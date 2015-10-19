@@ -1,0 +1,123 @@
+body {
+	padding: 0 30px 20px 30px;
+}
+
+#header-navigate{
+	margin-left:30px;
+ }
+
+#header-navigate a{
+	margin-top:-12px;
+}
+
+.ui.avatar.image.monitor_logo{
+	margin-right:20px;
+	margin-top:-8px;
+}
+
+#console {
+	min-height: 300px;
+  	max-height: 300px;
+	overflow: auto;
+}
+
+.username-msg {
+	color: orange;
+}
+
+.connect-msg {
+	color: green;
+}
+
+.disconnect-msg {
+	color: red;
+}
+
+.send-msg {
+	color: #888
+}
+
+.tip_text{
+	color:#999;
+}
+
+
+
+#navigate {
+	margin-bottom: 40px;
+}
+
+#btnKickGroup {
+	width: 220px;
+	margin-top: 4px;
+	margin-left: 10px;
+
+}
+
+#btnKickUser {
+	width: 220px;
+	margin-top: 4px;
+	margin-left: 20px;
+	padding-left: 25px;
+	border-left: 1px #DDD solid;
+}
+
+#listenGroup {
+	width: 280px;
+	margin-top: 4px;
+	margin-left: 20px;
+	padding-left: 25px;
+	border-left: 1px #DDD solid;
+}
+
+.ui.list .item a {
+	color: #fff;
+}
+
+#groups_area {
+	min-height: 30px;
+	max-height: 513px;
+	overflow-y: scroll;
+	-ms-overflow-y: scroll;
+}
+
+#groups_area a {
+	margin-top: 5px;
+	width: 100px;
+}
+
+#group_area a {
+	margin: 2px;
+	min-width: 80px;
+	text-align: center;
+}
+
+#spears_area a {
+	padding: 0.8em !important;
+	margin-bottom: 5px;
+}
+
+#spear_stat {
+	margin-top: -20px;
+}
+
+#spear_stat .statistic {
+	margin-right: 30px;
+}
+
+#spear_stat .statistic .value .icon {
+	width: 40px;
+	display: inline-block;
+}
+
+#spear_stat .statistic .value span {
+	width: 30px;
+}
+
+#spear_stat i.small.icon {
+	font-size: 0.5em
+}
+
+#spear_stat span {
+	font-size: 0.4em
+}

@@ -1,0 +1,25 @@
+<div class="ui divided relaxed horizontal list">
+	<div class="item">
+		<h2><img class="ui avatar image monitor_logo" src="/img/gru.png">Gru Dashboard</h2>
+	</div>
+	<div class="item" style="border-left:none;">
+		<div class="tab">
+			<div class="ui secondary menu" id="header-navigate">
+				<a class="item" data-tab="first" href="/">模拟客户端</a>
+				<a class="item" data-tab="second" href="/m">监控</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$(document).ready(function(){
+		//气泡提示
+		$(".monitor_logo").popup({
+			position : 'right center',
+			target   : '.monitor_logo',
+			title    : '',
+			content  : 'Gru是长连接服务代号，取自《卑鄙的我》'
+		});
+	});
+</script>

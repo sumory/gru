@@ -1,0 +1,98 @@
+benckmark
+
+10.60.0.43，1000客户端，1秒发送一条消息，压测10.60.0.44
+
+43基本处于挂的状态
+top - 18:56:00 up 47 days,  1:32,  2 users,  load average: 1092.06, 972.32, 588.53
+Tasks: 1172 total,   2 running, 1170 sleeping,   0 stopped,   0 zombie
+Cpu(s): 34.0%us, 29.9%sy,  0.0%ni,  0.0%id, 33.7%wa,  0.5%hi,  1.9%si,  0.0%st
+Mem:  15936840k total, 15806240k used,   130600k free,      812k buffers
+Swap:  8191992k total,  7035196k used,  1156796k free,    19716k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                                 
+46278 root      20   0  649m  10m 2252 D  1.6  0.1   0:01.86 node                                                                                                    
+46213 root      20   0  650m  18m 2388 S  1.3  0.1   0:02.27 node                                                                                                    
+46219 root      20   0  649m  10m 2172 D  1.3  0.1   0:01.74 node                                                                                                    
+47969 root      20   0  650m  16m 2656 D  1.3  0.1   0:01.91 node                                                                                                    
+46285 root      20   0  649m  12m 2348 S  1.0  0.1   0:01.51 node                                                                                                    
+46296 root      20   0  649m  11m 2116 D  1.0  0.1   0:01.56 node                                                                                                    
+46823 root      20   0  650m  17m 2536 D  1.0  0.1   0:01.64 node                                                                                                    
+47218 root      20   0  649m  14m 2144 D  1.0  0.1   0:01.83 node                                                                                                    
+47241 root      20   0  650m  16m 2792 D  1.0  0.1   0:01.96 node                                                                                                    
+47250 root      20   0  650m  16m 2608 D  1.0  0.1   0:02.05 node                                                                                                    
+47352 root      20   0  650m  18m 2536 S  1.0  0.1   0:01.92 node                                                                                                    
+47513 root      20   0  650m  19m 2708 R  1.0  0.1   0:01.94 node                                                                                                    
+47965 root      20   0  650m  17m 2424 D  1.0  0.1   0:01.96 node                                                                                                    
+48065 root      20   0  650m  18m 2628 S  1.0  0.1   0:01.68 node                                                                                                    
+48094 root      20   0  649m  16m 2240 D  1.0  0.1   0:01.60 node                                                                                                    
+48187 root      20   0  649m  17m 2240 D  1.0  0.1   0:01.92 node                                                                                                    
+48249 root      20   0  650m  20m 2596 D  1.0  0.1   0:01.77 node                                                                                                    
+48373 root      20   0 15832 1636  468 R  1.0  0.0   0:03.22 top                                                                                                     
+46202 root      20   0  649m  11m 2120 D  0.6  0.1   0:01.92 node                                                                                                    
+46204 root      20   0  649m  13m 2608 D  0.6  0.1   0:01.74 node                                                                                                    
+46209 root      20   0  649m  10m 2160 D  0.6  0.1   0:01.63 node                                                                                                    
+46214 root      20   0  649m  10m 2120 D  0.6  0.1   0:01.96 node                                                                                                    
+46221 root      20   0  649m  10m 2136 D  0.6  0.1   0:01.69 node                                                                                                    
+46222 root      20   0  649m  12m 2104 D  0.6  0.1   0:01.90 node                                                                                                    
+46223 root      20   0  649m  11m 2164 D  0.6  0.1   0:01.95 node                         
+
+
+44上，稳定连接不断减少到四五百
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+505
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+509
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+506
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+500
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+501
+[root@centos6 spear]# netstat -anp | grep 11111| grep ESTAB|wc -l
+496
+
+dstat也不正常
+----total-cpu-usage---- -dsk/total- -net/total- ---paging-- ---system-- ----system----
+usr sys idl wai hiq siq| read  writ| recv  send|  in   out | int   csw |  date/time   
+  8   7  83   0   1   1|   0    96k| 111k  315k|   0     0 |7524  8116 |17-01 18:58:59
+  9   7  82   0   0   2|   0    72k| 112k  336k|   0     0 |8071  9468 |17-01 18:59:00
+  7   5  86   0   1   1|   0    56k|  95k  249k|   0     0 |6240  5151 |17-01 18:59:01
+  5   6  88   0   1   1|   0     0 |  93k  243k|   0     0 |6612  6411 |17-01 18:59:02
+  6   5  88   1   1   1|   0   144k|  83k  225k|   0     0 |6658  5500 |17-01 18:59:03
+  4   3  93   0   0   0|   0  8192B|  49k  141k|   0     0 |5407  4226 |17-01 18:59:04
+  2   2  96   1   0   0|   0   144k|  17k   35k|   0     0 |4457  2073 |17-01 18:59:05
+  2   1  97   1   0   0|   0    24k|  16k   37k|   0     0 |4519  2449 |17-01 18:59:06
+  2   2  97   0   0   0|   0     0 |  23k   49k|   0     0 |5064  3189 |17-01 18:59:07
+  2   1  97   0   0   0|   0    68k|  23k   46k|   0     0 |4591  2488 |17-01 18:59:08
+  
+  
+ top也不正常
+  top - 18:59:33 up 212 days,  3:11,  2 users,  load average: 0.00, 0.04, 0.04
+Tasks: 181 total,   1 running, 180 sleeping,   0 stopped,   0 zombie
+Cpu(s):  6.8%us,  4.6%sy,  0.0%ni, 86.4%id,  1.4%wa,  0.3%hi,  0.5%si,  0.0%st
+Mem:  15936840k total, 15783244k used,   153596k free,   292800k buffers
+Swap:  8191992k total,    43616k used,  8148376k free,  9529344k cached
+
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND                                                                                                 
+62009 root      20   0 4514m 633m  11m S 42.4  4.1  90:37.15 java                                                                                                    
+58205 root      20   0 9558m 1.9g  84m S  9.3 12.2  36:49.33 java                                                                                                    
+62926 root      20   0 15036 1296  944 R  0.7  0.0   0:00.04 top                                                                                                     
+ 7367 root      20   0 4514m 1.7g  12m S  0.3 11.0 181:38.18 java                                                                                                    
+18677 root      20   0 6359m 394m  11m S  0.3  2.5 220:48.47 java                                                                                                    
+62395 root      20   0  140m 5916 2104 S  0.3  0.0   0:12.70 python                                                                                                  
+    1 root      20   0 19232  648  448 S  0.0  0.0   0:01.67 init                                                                                                    
+    2 root      20   0     0    0    0 S  0.0  0.0   0:00.00 kthreadd                                                                                                
+    3 root      RT   0     0    0    0 S  0.0  0.0   0:07.37 migration/0                                                                                             
+    4 root      20   0     0    0    0 S  0.0  0.0   1:05.55 ksoftirqd/0                                                                                             
+    5 root      RT   0     0    0    0 S  0.0  0.0   0:00.00 migration/0                                                                                             
+    6 root      RT   0     0    0    0 S  0.0  0.0   0:25.84 watchdog/0                                                                                              
+    7 root      RT   0     0    0    0 S  0.0  0.0   0:02.60 migration/1                                                                                             
+    8 root      RT   0     0    0    0 S  0.0  0.0   0:00.00 migration/1                                                                                             
+    9 root      20   0     0    0    0 S  0.0  0.0   0:02.21 ksoftirqd/1                                                                                             
+   10 root      RT   0     0    0    0 S  0.0  0.0   0:20.81 watchdog/1                                                                                              
+   11 root      RT   0     0    0    0 S  0.0  0.0   0:02.54 migration/2                
+   
+   
+   
+   结论猜测：
+   客户端压力问题，导致连接不稳定

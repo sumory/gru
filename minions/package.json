@@ -1,0 +1,36 @@
+{
+    "name":"minions",
+    "version": "0.0.1",
+    "private": true,
+    "engines": {
+        "node": ">=0.10.x"
+    },
+    "author": {
+
+    },
+    "scripts": {
+        "start": "node ./app.js",
+        "test": "make test"
+    },
+    "dependencies": {
+        "express": "~4.0.0",
+        "static-favicon": "~1.0.0",
+        "cookie": "0.1.0",
+        "cookie-parser": "~1.0.1",
+        "body-parser": "~1.0.0",
+        "debug": "~0.7.4",
+        "ejs": "~0.8.5",
+        "method-override": "1.0.0",
+        "express-session": "1.0.2",
+        "multiparty": "3.2.4",
+        "redis": "0.10.1",
+        "node-zookeeper-client":"*",
+        "mysql": "2.4.2",
+        "log4js": "0.6.16",
+        "request":"2.53.0"
+    },
+    "devDependencies": {
+        "should": "*",
+        "mocha": "*"
+    }
+}

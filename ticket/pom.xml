@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.sumory</groupId>
+		<artifactId>gru</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+
+
+	<artifactId>ticket</artifactId>
+	<packaging>jar</packaging>
+
+	<name>ticket</name>
+	<description>gru前端路由层，路由客户端连接到具体的spear接入层</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<!-- 内部依赖包 -->
+		<dependency>
+			<groupId>gru</groupId>
+			<artifactId>common</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
+
+		<!-- 公用依赖包 -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+		</dependency>
+
+
+		<!-- 私有依赖包 -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>5.0.0.Alpha1</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<finalName>ticket</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+
+			<!-- 拷贝依赖的jar包到lib目录 -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-lib</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>
+								${project.build.directory}/lib
+							</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+
+			<!-- 拷贝文件，形成“发布”包文件夹release -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.5</version>
+				<executions>
+					<execution>
+						<id>copy-properties-config</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${project.build.directory}/release/conf</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/resources/profiles/${profiles.active}/</directory>
+									<includes>
+										<include>*.properties</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-bin</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${project.build.directory}/release/bin</outputDirectory>
+							<resources>
+								<resource>
+									<directory>src/main/resources/bin</directory>
+									<includes>
+										<include>*.*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-libs</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/lib</directory>
+									<includes>
+										<include>*.jar</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-self-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<encoding>UTF-8</encoding>
+							<outputDirectory>${project.build.directory}/release/lib</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}</directory>
+									<includes>
+										<include>${project.build.finalName}.jar</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+
+	</build>
+
+	<profiles>
+		<profile>
+			<id>dev</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<profiles.active>dev</profiles.active>
+			</properties>
+		</profile>
+		
+		<profile>
+			<id>test1</id>
+			<properties>
+				<profiles.active>test1</profiles.active>
+			</properties>
+			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
+				<resources>
+					<resource>
+						<directory>src/main/resources/**</directory>
+						<excludes>
+							<exclude>*</exclude>
+						</excludes>
+					</resource>
+				</resources> 
+			</build>
+		</profile>
+		<profile>
+			<id>test2</id>
+			<properties>
+				<profiles.active>test2</profiles.active>
+			</properties>
+			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
+				<resources>
+					<resource>
+						<directory>src/main/resources/**</directory>
+						<excludes>
+							<exclude>*</exclude>
+						</excludes>
+					</resource>
+				</resources> 
+			</build>
+		</profile>
+		<profile>
+			<id>test83</id>
+			<properties>
+				<profiles.active>test83</profiles.active>
+			</properties>
+			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
+				<resources>
+					<resource>
+						<directory>src/main/resources/**</directory>
+						<excludes>
+							<exclude>*</exclude>
+						</excludes>
+					</resource>
+				</resources> 
+			</build>
+		</profile>
+		<profile>
+			<id>prod171</id>
+			<properties>
+				<profiles.active>prod171</profiles.active>
+			</properties>
+			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
+				<resources>
+					<resource>
+						<directory>src/main/resources/**</directory>
+						<excludes>
+							<exclude>*</exclude>
+						</excludes>
+					</resource>
+				</resources> 
+			</build>
+		</profile>
+	</profiles>
+</project>

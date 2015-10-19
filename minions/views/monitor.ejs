@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Gru Monitor</title>
+	<%- include ./common/meta.ejs %>
+</head>
+<body>
+	<%- include ./common/header.ejs %>
+
+	<div id="navigate" class="ui secondary pointing three item menu red">
+		<a class="active item" show="1">
+			集群状态监控
+		</a>
+		<a class="item" show="2">
+			群组、用户管理
+		</a>
+		<a class="item" show="3">
+			其它
+		</a>
+	</div>
+
+
+	<div id="section1" class="custom_section">
+
+		<div class="ui form segment">
+			<h4 class="ui left floated header">
+				操作
+			</h4>
+
+			<div class="inline field">
+				<div class="ui divided relaxed horizontal list">
+					<div class="item">
+
+						<div class="ui divided relaxed horizontal list">
+							<div class="item">
+								<div id="btnGetSpears" class="ui facebook button"><i class="sitemap small icon"></i>节点</div>
+								<div id="btnGetGroups" class="ui teal button">所有群组</div>
+								<div id="btnClear" class="ui black button"><i class="erase small icon"></i>清空显示</div>
+							</div>
+							<div class="item">
+								<div class="ui toggle checkbox" id="autoGetSpears">
+									<input type="checkbox"/>
+									<label>自动获取节点</label>
+								</div>
+							</div>
+							<div class="item">
+								<div class="ui toggle checkbox" id="autoGetSpearGroups">
+									<input type="checkbox"/>
+									<label>自动获取所有群组</label>
+								</div>
+							</div>
+
+						</div>
+
+
+
+
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+
+
+		<div class="ui form segment" style="height:180px;">
+			<h4 class="ui left floated header">
+				节点
+			</h4>
+
+			<div class=" field">
+				<div class="ui grid">
+					<div class="row">
+						<div class="four wide column">
+							<div class="ui " id="spears_area">
+								<i class=" red attention circular small icon"></i>
+								<span class="tip_text">存活的长连接服务节点</span>
+
+							</div>
+
+						</div>
+						<div class=" twelve wide column">
+							<div class="ui " id="spear_stat"></div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+
+		<div class="ui form segment">
+			<h4 class="ui left floated header">
+				群组-用户 <span id="group_place_holder"></span>
+			</h4>
+
+			<div class=" field">
+				<div class="ui " id="group_area">
+					<i class=" red attention circular small icon"></i>
+					<span class="tip_text">某个节点某个群组下的用户</span>
+
+				</div>
+			</div>
+		</div>
+
+
+		<div class="ui form segment">
+			<h4 class="ui left floated header">
+				节点-群组 <span id="spear_place_holder"></span>
+			</h4>
+
+			<div class=" field">
+				<div class="ui " id="groups_area">
+					<i class=" red attention circular small icon"></i>
+					<span class="tip_text">节点-群组 对</span>
+
+				</div>
+			</div>
+		</div>
+
+
+	</div>
+
+	<div id="section2" class="custom_section">
+		<div class="ui form segment">
+			<h4 class="ui left floated header">
+				操作
+			</h4>
+
+			<div class="inline field">
+
+				<div class="ui divided relaxed horizontal list">
+					<div class="item">
+						<div class="ui divided relaxed horizontal list">
+
+							<div class="item">
+								<div class="ui black button">查找用户所在节点</div>
+								<div class="ui black button">查找群组所在节点</div>
+
+							</div>
+
+						</div>
+
+						<div class="ui action left input btnKickUser" id="btnKickUser">
+							<input type="text" id="toKickUserId" placeholder="用户id…">
+
+							<div class="ui blue button">踢出用户</div>
+						</div>
+						<div class="ui action right input btnKickGroup" id="btnKickGroup">
+							<input type="text" id="toKickGroupId" placeholder="群组id…">
+
+							<div class="ui blue button">踢出群组</div>
+						</div>
+
+						<div class="ui action left input" id="listenGroup">
+							<input type="text" id="toListenGroupId" placeholder="群组id…">
+
+							<div class="ui blue button">监听群组</div>
+						</div>
+						</div>
+					</div>
+			</div>
+		</div>
+
+	</div>
+
+	<%- include ./common/sidebar.ejs %>
+	<script src="/js/gru/monitor.js"></script>
+	<script>
+		gru && gru.dashboard.init();
+
+		//选项卡逻辑
+		$(".custom_section").each(function(){
+			$(this).hide();
+		});
+		$("#section1").show();
+		$('.menu a.item').on('click', function () {
+			$(this).addClass('active')
+					.closest('.ui.menu')
+					.find('.item')
+					.not($(this))
+					.removeClass('active');
+
+			$(".custom_section").each(function(){
+				$(this).hide();
+			});
+			$("#section"+$(this).attr("show")).show();
+		});
+
+		//气泡提示
+		$('#btnGetGroups').popup({
+			position : 'right center',
+			target   : '#btnGetGroups',
+			title    : '注意',
+			content  : '当集群中群组过多时，慎用此操作，尽量单独查看各节点的群组情况'
+		});
+
+		//导航选中
+		$("#header-navigate a[data-tab=second]").addClass("active");
+	</script>
+
+
+
+</body>
+</html>

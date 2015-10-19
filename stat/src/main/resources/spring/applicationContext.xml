@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context classpath:org/springframework/context/config/spring-context-4.0.xsd
+        http://www.springframework.org/schema/aop classpath:org/springframework/aop/config/spring-aop-4.0.xsd
+        http://www.springframework.org/schema/tx classpath:org/springframework/transaction/config/spring-tx-4.0.xsd ">
+
+
+	<context:property-placeholder location="classpath*:*.properties" ignore-unresolvable="true" />
+	<context:component-scan base-package="com.sumory.gru.stat"/>
+	
+	
+</beans>

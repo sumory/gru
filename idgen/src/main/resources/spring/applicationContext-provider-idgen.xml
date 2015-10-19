@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:koo="http://www.koolearn.com/schema/test/koo" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans classpath:org/springframework/beans/factory/xml/spring-beans-3.2.xsd http://code.alibabatech.com/schema/dubbo classpath:spring/dubbo.xsd"
+	default-autowire="byName" default-lazy-init="false">
+	
+	<dubbo:service
+		interface="com.sumory.gru.idgen.service.IdService"
+		protocol="dubbo" version="${dubbo.gru.idgen.version}" timeout="5000" ref="idService" />
+	
+</beans>

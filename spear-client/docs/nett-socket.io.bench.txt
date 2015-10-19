@@ -1,0 +1,9 @@
+Customer feedback in 2012:
+CentOS, 1 CPU, 4GB RAM runned on VM: CPU 10%, Memory 15%
+6000 xhr-long polling sessions or 15000 websockets sessions
+4000 messages per second
+
+Customer feedback in 2014:
+30 000 simultaneous websocket clients
+140 000 messages per second 
+less than 1 second average delay
