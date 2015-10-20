@@ -69,6 +69,7 @@ public class SpearServer {
     private Map<String, String> config;
     private ISender sender;
     private IReceiver receiver;
+    private String gruTopic = "gru_topic";
 
     public SpearServer(final SpearContext context) {
         this.context = context;
@@ -79,7 +80,7 @@ public class SpearServer {
         this.receiver = context.getReceiver();
         this.statService = context.getStatService();
 
-        this.receiver.subscribe("class");
+        this.receiver.subscribe(gruTopic);
     }
 
     /**
@@ -286,7 +287,7 @@ public class SpearServer {
                             user.getName());
 
                     //sender.send("class", 0, data);
-                    sender.send(msg);
+                    sender.send(gruTopic, msg);
 
                     result.put("success", true);
                     result.put("errorCode", 0);

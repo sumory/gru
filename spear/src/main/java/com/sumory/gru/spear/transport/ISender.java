@@ -6,7 +6,7 @@ public interface ISender {
 
     public void run() throws Exception;
 
-    public void send(MsgObject msg);
+    public void send(final String topic, MsgObject msg);
 
     public void send(String topic, long tags, String body);
 }

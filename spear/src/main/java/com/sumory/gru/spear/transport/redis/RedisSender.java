@@ -33,31 +33,19 @@ public class RedisSender implements ISender {
 
     @Override
     public void send(String topic, long tags, String body) {
-        this.executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MsgObject msg = new MsgObject();
 
-                    RedisSender.this.msgQueue.put(msg);//put方法放入一个msg，若queue满了，等到queue有位置
-                }
-                catch (Exception e) {
-                    logger.error("往内部消息队列传入消息发生异常", e);
-                }
-            }
-        });
     }
 
     @Override
-    public void send(final MsgObject msg) {
+    public void send(final String topic, final MsgObject msg) {
         this.executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    RedisSender.this.msgQueue.put(msg);//put方法放入一个msg，若queue满了，等到queue有位置
+                    RedisListener.getInstance().publish(topic, msg);
                 }
                 catch (Exception e) {
-                    logger.error("往内部消息队列传入消息发生异常", e);
+                    logger.error("往redis消息队列{}传入消息发生异常", topic, e);
                 }
             }
         });

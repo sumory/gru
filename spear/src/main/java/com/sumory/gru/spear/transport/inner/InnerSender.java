@@ -27,7 +27,7 @@ public class InnerSender implements ISender {
     public InnerSender(final SpearContext context) {
         this.context = context;
         this.msgQueue = this.context.getMsgQueue();
-        this.executor = Executors.newScheduledThreadPool(1);
+        this.executor = Executors.newFixedThreadPool(1);
 
     }
 
@@ -49,7 +49,7 @@ public class InnerSender implements ISender {
     }
 
     @Override
-    public void send(final MsgObject msg) {
+    public void send(final String topic, final MsgObject msg) {
         this.executor.execute(new Runnable() {
             @Override
             public void run() {

@@ -16,6 +16,8 @@ import com.sumory.gru.spear.transport.IReceiver;
 import com.sumory.gru.spear.transport.ISender;
 import com.sumory.gru.spear.transport.inner.InnerReceiver;
 import com.sumory.gru.spear.transport.inner.InnerSender;
+import com.sumory.gru.spear.transport.redis.RedisReceiver;
+import com.sumory.gru.spear.transport.redis.RedisSender;
 import com.sumory.gru.spear.transport.rocketmq.RocketMQReceiver;
 import com.sumory.gru.spear.transport.rocketmq.RocketMQSender;
 import com.sumory.gru.spear.zk.ZkUtil;
@@ -78,6 +80,10 @@ public class SpearMain {
             case "inner":
                 sender = new InnerSender(context);
                 receiver = new InnerReceiver(context);
+                break;
+            case "redis":
+                sender = new RedisSender(context);
+                receiver = new RedisReceiver(context);
                 break;
             case "roketmq":
                 sender = new RocketMQSender(context);

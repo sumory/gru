@@ -10,11 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
-
-import com.sumory.gru.common.config.Config;
-import com.sumory.gru.common.utils.RedisUtil;
 import com.sumory.gru.spear.SpearContext;
 import com.sumory.gru.spear.domain.Group;
 import com.sumory.gru.spear.domain.MsgObject;
@@ -38,12 +33,9 @@ public class RedisReceiver implements IReceiver {
 
     private ConcurrentHashMap<String, Group> groupMap;//groupId - group
     private ConcurrentHashMap<String, User> userMap;//userId - user
-    private BlockingQueue<MsgObject> msgQueue;//存放消息的队列
+    private static BlockingQueue<MsgObject> msgQueue;//存放消息的队列
 
     private final ExecutesManager executesManager;
-
-    private RedisUtil redisUtil;
-    private RedisListener redisListener;
 
     public RedisReceiver(final SpearContext context) {
         this.context = context;
@@ -58,41 +50,36 @@ public class RedisReceiver implements IReceiver {
         this.executesManager = new ExecutesManager(minCorePoolSize, maxCorePoolSize, queueSize,
                 keepAliveTime);
 
-        JedisPoolConfig config = new JedisPoolConfig();
-        //对象池内最大的对象数  
-        config.setMaxTotal(Integer.valueOf(Config.get("redis.pool.maxTotal")));
-        //最大限制对象数  
-        config.setMaxIdle(Integer.valueOf(Config.get("redis.pool.maxIdle")));
-        //当池内没有返回对象时，最大等待时间  
-        config.setMaxWaitMillis(Long.valueOf(Config.get("redis.pool.maxWaitMillis")));
-        config.setTestOnBorrow(Boolean.valueOf(Config.get("redis.pool.testOnBorrow")));
-        config.setTestOnReturn(Boolean.valueOf(Config.get("redis.pool.testOnReturn")));
-        //通过apache common-pool中的PoolableObjectFactory来管理对象的生成和销户等操作，而ObjectPool来管理对象borrow和return  
-        JedisPool jedisPool = new JedisPool(config, Config.get("redis.ip"), Integer.valueOf(Config
-                .get("redis.port")));
-        redisUtil = new RedisUtil(jedisPool);
-
-        redisListener = new RedisListener();
     }
 
     @Override
-    public void subscribe(String topic) {
-        ExecutorService executor = Executors.newFixedThreadPool(1);
+    public void subscribe(final String topic) {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
         executor.execute(new Runnable() {
             @Override
             public void run() {
                 try {
-                    
-                    redisUtil
+                    RedisListener.getInstance().subscribe(topic);
+                    logger.info("订阅topic:{}", topic);
+                }
+                catch (Exception e) {
+                    logger.error("订阅topic:{}发生异常", topic, e);
+                }
+            }
+        });
+
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
                     while (true) {
                         MsgObject msg = msgQueue.take();//take方法取出一个，若为空，等到有为止(获取并移除此队列的头部)
-
                         logger.info("从消息队列取出消息发送：{}", msg);
                         RedisReceiver.this.consumeMessage(msg);
                     }
                 }
                 catch (Exception e) {
-                    logger.error("消费内部消息队列发生异常", e);
+                    logger.error("本地队列消费程序发生异常", e);
                 }
             }
         });

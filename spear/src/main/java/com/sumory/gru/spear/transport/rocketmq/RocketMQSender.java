@@ -59,7 +59,7 @@ public class RocketMQSender implements ISender {
     }
 
     @Override
-    public void send(final MsgObject msg) {
+    public void send(final String topic, final MsgObject msg) {
         //TODO
     }
 }
