@@ -19,3 +19,9 @@
 - 采用[socket.io](http://socket.io)协议
 - 各模块均支持水平扩展
 - 单节点可服务10W+以上长连接，具体为在不断发消息的情况下(1000条/秒)，单长连接服务节点支持的稳定连接数量在10W+(8核16G)
+
+
+##### 监控后台screenshots
+
+![](docs/dashboard-client.png)
+![](docs/dashboard-monitor.png)
