@@ -6,6 +6,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,8 @@ public class InnerReceiver implements IReceiver {
                 try {
                     while (true) {
                         MsgObject msg = msgQueue.take();//take方法取出一个，若为空，等到有为止(获取并移除此队列的头部)
+
+                        logger.info("从消息队列取出消息发送：{}", msg);
                         InnerReceiver.this.consumeMessage(msg);
                     }
                 }
@@ -95,11 +98,11 @@ public class InnerReceiver implements IReceiver {
 
                         int msgType = m.getType();//确定单播还是组播
                         if (msgType == MsgObject.BRAODCAST.getValue()) {//群发
-                            Long targetId = Long.parseLong((String) m.getTarget().get("id"));
+                            String targetId = (String) m.getTarget().get("id");
                             sendToGroup(targetId, sm);
                         }
                         else if (msgType == MsgObject.UNICAST.getValue()) {//单发
-                            Long targetId = Long.parseLong((String) m.getTarget().get("id"));
+                            String targetId = (String) m.getTarget().get("id");
                             sendToUser(targetId, sm);
                         }
                         else {
@@ -124,7 +127,7 @@ public class InnerReceiver implements IReceiver {
      * @param groupId
      * @param msg
      */
-    private void sendToGroup(Long groupId, BaseMessage msg) {
+    private void sendToGroup(String groupId, BaseMessage msg) {
         logger.info("开始群发, groupId:{} msgId:{}", groupId, msg.getId());
         if (groupId != null) {
             Group group = this.groupMap.get(groupId);
@@ -142,16 +145,17 @@ public class InnerReceiver implements IReceiver {
      * @param userId
      * @param msg
      */
-    private void sendToUser(Long userId, BaseMessage msg) {
+    private void sendToUser(String userId, BaseMessage msg) {
         logger.info("开始单发, userId:{}  msgId:{}", userId, msg.getId());
-        if (userId == null)
+        if (StringUtils.isBlank(userId))
             return;
 
         User u = this.userMap.get(userId);
-        if (u == null || u.getClients() == null)
+        if (u == null || u.getClients() == null) {
+            logger.debug("单发消息时无法获取到用户或者用户的clients为空, userId:{}", userId);
             return;
+        }
 
         u.send("msg", msg);
     }
-
 }

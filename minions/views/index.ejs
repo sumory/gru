@@ -18,7 +18,7 @@
 				<label>用户id</label> <input id="id" class="input" type="text" placeholder="Type id" value=1 />
 			</div>
 			<div class="field">
-				<label>群组</label><input id="groupId" class="input" type="text" placeholder="Type class id" value=10 />
+				<label>要订阅的群组(逗号分隔)</label><input id="groupId" class="input" type="text" placeholder="Type class id" value=10 />
 			</div>
 			<div class="field">
 				<label>连接地址</label>
@@ -40,7 +40,7 @@
 		</div>
 		<div class=" inline field">
 			<i class=" red attention circular small icon"></i> 
-			<span id="status " class="tip_text">多次点击Connect会产生多个连接,正常情况下请勿多次触发Connect</span>
+			<span id="status" class="tip_text">多次点击Connect会产生多个连接,正常情况下请勿多次触发Connect</span>
 		</div>
 	</div>
 	
@@ -74,14 +74,15 @@
 		var userName = userId;
 		var token1,token2;
 		var socket;
-		
+
 		var autoMessageFlag = 0;
 		$("#id").val(userId);
+        userName ="mock_user_"+$("#id").val();
 
 		function connect() {
 			var url = $("#url").dropdown("get value");
 			var userType=$("#userType").dropdown("get value");
-			userName ="mock_"+ (userType==1?"teacher_":"student_")+$("#id").val();
+
 			updateStatus("尝试连接" + url);
 
 			$.ajax({//生成token
@@ -110,8 +111,6 @@
 					console.log('error');
 				}
 			});
-
-
 		}
 
 
@@ -134,19 +133,41 @@
 
 			socket.on('auth_result', function(data) {
 				output('授权结果：' + JSON.stringify(data));
-				socket.emit('subscribe', JSON.stringify({
-					userId : $("#id").val(),
-					subscribeGroups:[
-						{
-							id:10,
-							name:"群组10"
-						},
-						{
-							id:20,
-							name:"群组20"
-						}
-					]
-				}));
+                updateStatus("连接成功");
+
+                var groups = $("#groupId").val();
+                if(!groups){
+                    updateStatus("未订阅群组");
+                    return;
+                }
+
+
+
+                var groupIds = groups.split(",");
+
+                var subscribeGroups = [];
+                for(var i in groupIds){
+                    if(isNum(groupIds[i])){
+                        var gid = parseInt(groupIds[i],10);
+                        subscribeGroups.push({
+                            id:gid,
+                            name:"群组"+gid
+                        });
+                    }
+                }
+
+
+
+                if(subscribeGroups.length>0){
+                    socket.emit('subscribe', JSON.stringify({
+                        userId : parseInt($("#id").val(),10),
+                        // subscribeGroups:subscribeGroups
+                        subscribeGroups:subscribeGroups
+                    }));
+                }
+
+
+
 			});
 
 			//订阅群组的回调
@@ -241,6 +262,14 @@
 			$('#console').append(element);
 			document.querySelector("#console").scrollTop = document.querySelector("#console").scrollHeight;
 		}
+
+        //判断是否为数字
+        function isNum(s){
+            if (s!=null && s!=""){
+                return !isNaN(s);
+            }
+            return false;
+        }
 
 		//导航选中
 		$("#header-navigate a[data-tab=first]").addClass("active");

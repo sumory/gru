@@ -69,17 +69,16 @@
                     dataType: 'json',
                     success: function (result) {
                         if (result && result.success) {
-                            var teachers = result.data.teachers;
-                            var studentIds = result.data.studentIds;
+                            var userIds = result.data.userIds;
                             $("#group_area").empty();
 
-                            if(!teachers && !studentIds){
+                            if(!userIds){
                                 $("#group_area").html("无数据");
                                 return;
                             }
 
-                            studentIds.sort();
-                            $("#group_place_holder").text("【群组" + groupId.split("_")[1] +": "+ teachers.length + "个老师 "+ studentIds.length + "个学生】");
+                            userIds.sort();
+                            $("#group_place_holder").text("【群组" + groupId.split("_")[1] +": "+ userIds.length + "个用户】");
 
 
                             /**
@@ -87,11 +86,8 @@
                              */
 
 
-                            for (var i = 0; i < teachers.length; i++) {
-                                $("#group_area").append('<a class="ui red label">' + teachers[i].id+":"+teachers[i].name + '</a>');
-                            }
-                            for (var i = 0; i < studentIds.length; i++) {
-                                $("#group_area").append('<a class="ui purple label btnGetUser" data-id="'+studentIds[i]+'">' + studentIds[i] + '</a>');
+                            for (var i = 0; i < userIds.length; i++) {
+                                $("#group_area").append('<a class="ui purple label btnGetUser" data-id="'+userIds[i]+'">' + userIds[i] + '</a>');
                             }
                         }else{
                             $("#group_place_holder").text("");

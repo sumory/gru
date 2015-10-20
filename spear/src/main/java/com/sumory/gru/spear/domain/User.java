@@ -79,7 +79,7 @@ public class User {
     }
 
     public void send(String eventName, BaseMessage msg) {
-        logger.debug("send msg to user-> thread:{} id:{} clients size:{} eventName:{} msg:{}",
+        logger.debug("send msg to user-> thread:{} userId:{} clients size:{} eventName:{} msg:{}",
                 Thread.currentThread().getName(), id, this.clients.size(), eventName, msg);
         for (Client client : clients) {
             client.send(eventName, msg);

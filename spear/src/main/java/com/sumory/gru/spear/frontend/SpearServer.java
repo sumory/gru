@@ -153,12 +153,15 @@ public class SpearServer {
                         newUser.setName(authObject.getName());
                         newUser.addClientToUser(newClient);
                         ioClient.set("user", newUser);//为ioClient设置对应的user
+                        logger.debug("新授权用户{}的client总数为{}", key, newUser.getClients().size());//size操作耗时，生产去掉
                         userMap.put(key, newUser);
                     }
                     else {
                         User existUser = userMap.get(key);
                         ioClient.set("user", existUser);//为ioClient设置对应的user
                         existUser.addClientToUser(newClient);
+                        logger.debug("已授权用户{}有新的client连入，当前client总数为{}", key, existUser
+                                .getClients().size());//size操作耗时，生产去掉
                     }
                 }
 
@@ -365,12 +368,13 @@ public class SpearServer {
                 }
 
                 if (u != null) {
-                    logger.debug("用户:{}-{} 退出", u.getId(), ioClient.getSessionId());
+                    logger.debug("用户:{} sessionId:{} 退出", u.getId(), ioClient.getSessionId());
 
                     synchronized (u) {
                         u.removeClientFromUser(ioClient);
                         if (u.getClients().isEmpty()) {//如果user已经没有client连接了，说明user已经完全退出
-                            userMap.remove(u.getId());//从userMap中移除已经完全退出的user
+                            logger.debug("用户{}的所有连接已退出，现在删除用户", u.getId());
+                            userMap.remove(u.getId() + "");//从userMap中移除已经完全退出的user,fixbug: 必须传入的是string类型，否则删不掉
 
                             List<Group> joinedGroups = u.getGroups();
                             if (!CollectionUtils.isEmpty(joinedGroups)) {

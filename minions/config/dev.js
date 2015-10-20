@@ -27,6 +27,6 @@ module.exports = {
         spears: "/spearnodes_dev"
     },
 
-    statServer: "http://localhost:50000"
+    statServer: "http://192.168.100.122:50000"
 
 };

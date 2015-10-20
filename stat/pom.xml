@@ -332,6 +332,16 @@
 			<properties>
 				<profiles.active>dev</profiles.active>
 			</properties>
+			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
+				<resources>
+					<resource>
+						<directory>src/main/resources/**</directory>
+						<excludes>
+							<exclude>*</exclude>
+						</excludes>
+					</resource>
+				</resources>
+			</build>
 		</profile>
 
 		<profile>
@@ -367,38 +377,6 @@
 			</build>
 		</profile>
 
-		<profile>
-			<id>test83</id>
-			<properties>
-				<profiles.active>test83</profiles.active>
-			</properties>
-			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
-				<resources>
-					<resource>
-						<directory>src/main/resources/**</directory>
-						<excludes>
-							<exclude>*</exclude>
-						</excludes>
-					</resource>
-				</resources>
-			</build>
-		</profile>
 		
-		<profile>
-			<id>prod172</id>
-			<properties>
-				<profiles.active>prod172</profiles.active>
-			</properties>
-			<build><!-- 打包的时候忽略配置，由maven手动配置copy文件 -->
-				<resources>
-					<resource>
-						<directory>src/main/resources/**</directory>
-						<excludes>
-							<exclude>*</exclude>
-						</excludes>
-					</resource>
-				</resources>
-			</build>
-		</profile>
 	</profiles>
 </project>
