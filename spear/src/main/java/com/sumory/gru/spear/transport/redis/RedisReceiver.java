@@ -1,4 +1,4 @@
-package com.sumory.gru.spear.transport.inner;
+package com.sumory.gru.spear.transport.redis;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,6 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
+import com.sumory.gru.common.config.Config;
+import com.sumory.gru.common.utils.RedisUtil;
 import com.sumory.gru.spear.SpearContext;
 import com.sumory.gru.spear.domain.Group;
 import com.sumory.gru.spear.domain.MsgObject;
@@ -20,14 +25,14 @@ import com.sumory.gru.spear.thread.ExecutesManager;
 import com.sumory.gru.spear.transport.IReceiver;
 
 /**
- * 单节点时接受器
+ * 基于redis订阅的接受器
  * 
  * @author sumory.wu
- * @date 2015年10月15日 下午10:46:02
+ * @date 2015年10月18日 下午6:33:42
  */
-public class InnerReceiver implements IReceiver {
+public class RedisReceiver implements IReceiver {
 
-    private final static Logger logger = LoggerFactory.getLogger(InnerReceiver.class);
+    private final static Logger logger = LoggerFactory.getLogger(RedisReceiver.class);
 
     private SpearContext context;
 
@@ -37,7 +42,10 @@ public class InnerReceiver implements IReceiver {
 
     private final ExecutesManager executesManager;
 
-    public InnerReceiver(final SpearContext context) {
+    private RedisUtil redisUtil;
+    private RedisListener redisListener;
+
+    public RedisReceiver(final SpearContext context) {
         this.context = context;
         this.groupMap = this.context.getGroupMap();
         this.userMap = this.context.getUserMap();
@@ -49,9 +57,24 @@ public class InnerReceiver implements IReceiver {
         long keepAliveTime = 300L;
         this.executesManager = new ExecutesManager(minCorePoolSize, maxCorePoolSize, queueSize,
                 keepAliveTime);
+
+        JedisPoolConfig config = new JedisPoolConfig();
+        //对象池内最大的对象数  
+        config.setMaxTotal(Integer.valueOf(Config.get("redis.pool.maxTotal")));
+        //最大限制对象数  
+        config.setMaxIdle(Integer.valueOf(Config.get("redis.pool.maxIdle")));
+        //当池内没有返回对象时，最大等待时间  
+        config.setMaxWaitMillis(Long.valueOf(Config.get("redis.pool.maxWaitMillis")));
+        config.setTestOnBorrow(Boolean.valueOf(Config.get("redis.pool.testOnBorrow")));
+        config.setTestOnReturn(Boolean.valueOf(Config.get("redis.pool.testOnReturn")));
+        //通过apache common-pool中的PoolableObjectFactory来管理对象的生成和销户等操作，而ObjectPool来管理对象borrow和return  
+        JedisPool jedisPool = new JedisPool(config, Config.get("redis.ip"), Integer.valueOf(Config
+                .get("redis.port")));
+        redisUtil = new RedisUtil(jedisPool);
+
+        redisListener = new RedisListener();
     }
 
-    //内部传输不需要topic参数，留空即可
     @Override
     public void subscribe(String topic) {
         ExecutorService executor = Executors.newFixedThreadPool(1);
@@ -59,11 +82,13 @@ public class InnerReceiver implements IReceiver {
             @Override
             public void run() {
                 try {
+                    
+                    redisUtil
                     while (true) {
                         MsgObject msg = msgQueue.take();//take方法取出一个，若为空，等到有为止(获取并移除此队列的头部)
 
                         logger.info("从消息队列取出消息发送：{}", msg);
-                        InnerReceiver.this.consumeMessage(msg);
+                        RedisReceiver.this.consumeMessage(msg);
                     }
                 }
                 catch (Exception e) {
@@ -71,7 +96,6 @@ public class InnerReceiver implements IReceiver {
                 }
             }
         });
-
     }
 
     /**
@@ -88,7 +112,7 @@ public class InnerReceiver implements IReceiver {
     public void consumeMessage(final MsgObject m) {
         try {
             logger.debug("收到队列消息<--- thread:{} msg:{}", Thread.currentThread().getName(), m);
-            InnerReceiver.this.getCallExecute("msg-sender").execute(new Runnable() {
+            RedisReceiver.this.getCallExecute("msg-sender").execute(new Runnable() {
                 @Override
                 public void run() {
                     try {

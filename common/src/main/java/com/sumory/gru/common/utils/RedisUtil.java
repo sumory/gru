@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.exceptions.JedisConnectionException;
 import redis.clients.util.Pool;
 
@@ -1141,6 +1142,53 @@ public class RedisUtil {
             }
         }
         return rest;
+    }
+
+    //~=====  pub / sub ======
+    public void subscribe(JedisPubSub ps, String key) {
+        Jedis jedis = null;
+        try {
+            jedis = (Jedis) jedisPool.getResource();
+            jedis.subscribe(ps, new String[] { key });
+        }
+        catch (JedisConnectionException e) {
+            logger.error("Jedis Connection error", e);
+            if (jedis != null) {
+                jedisPool.returnBrokenResource(jedis);
+                jedis = null;
+            }
+        }
+        catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        finally {
+            if (jedis != null) {
+                this.jedisPool.returnResource(jedis);
+            }
+        }
+    }
+
+    public void pubish(String key, String content) {
+        Jedis jedis = null;
+        try {
+            jedis = (Jedis) jedisPool.getResource();
+            jedis.publish(key, content);
+        }
+        catch (JedisConnectionException e) {
+            logger.error("Jedis Connection error", e);
+            if (jedis != null) {
+                jedisPool.returnBrokenResource(jedis);
+                jedis = null;
+            }
+        }
+        catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
+        finally {
+            if (jedis != null) {
+                this.jedisPool.returnResource(jedis);
+            }
+        }
     }
 
     //~=============工具========================
