@@ -240,11 +240,11 @@ public class SpearServer {
                             newGroup.addUserToGroup(u);
                             if (CollectionUtils.isEmpty(u.getGroups())) {
                                 List<Group> groups = new ArrayList<Group>(1);
-                                groups.add(g);
+                                groups.add(newGroup);
                                 u.setGroups(groups);
                             }
                             else {
-                                u.getGroups().add(g);
+                                u.getGroups().add(newGroup);
                             }
                         }
                     }
@@ -379,10 +379,16 @@ public class SpearServer {
 
                             List<Group> joinedGroups = u.getGroups();
                             if (!CollectionUtils.isEmpty(joinedGroups)) {
+                                logger.debug("要完全退出的用户{}加入的群组不为空，挨个从群组里删除该用户", u.getId());
                                 for (Group g : joinedGroups) {
                                     //直接kickGroup的操作直接会从groupMap删除某个group，所以这里得到的可能为空
                                     if (g != null) {
-                                        g.removeUserFromGrop(u);
+                                        logger.debug("从群组挨个删除用户开始, groupId:{} userId:{}",
+                                                g.getId(), u.getId());
+                                        g.removeUserFromGroup(u);
+                                    }
+                                    else {
+                                        logger.debug("从群组挨个删除用户{}, 群组为null", u.getId());
                                     }
                                 }
                             }

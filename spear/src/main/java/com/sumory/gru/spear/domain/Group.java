@@ -91,15 +91,15 @@ public class Group {
     }
 
     /** 从群组用户列表里删除用户 */
-    public void removeUserFromGrop(User user) {
-        logger.debug("removeUserFromGrop, userId:" + user.getId());
+    public void removeUserFromGroup(User user) {
+        logger.debug("removeUserFromGroup,  groupId:{} userId:{}", id, user.getId());
 
         Iterator<User> iterator = users.iterator();
         while (iterator.hasNext()) {
             User u = iterator.next();
-            if (user == u || user.getId() == u.getId()) {//若user的id相同也需要删除
+            if (user.getId() == u.getId() || user == u) {//若user的id相同也需要删除
                 users.remove(u);
-                logger.debug("removeUserFromGrop done, groupId:{} userId:{}", id, user.getId());
+                logger.debug("removeUserFromGroup done, groupId:{} userId:{}", id, user.getId());
             }
         }
     }
