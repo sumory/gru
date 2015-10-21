@@ -1,5 +1,7 @@
 package com.sumory.gru.spear.transport.inner;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
@@ -92,16 +94,19 @@ public class InnerReceiver implements IReceiver {
                 @Override
                 public void run() {
                     try {
+                        int msgType = m.getType();//确定单播还是广播
+                        String targetId = m.getTarget().get("id") + "";
 
-                        StringMessage sm = new StringMessage(0, m.getContent());
+                        Map<String, Object> target = new HashMap<String, Object>();
+                        target.put("id", targetId);
+                        target.put("type", -1);//扩展字段，暂时没用到
+                        StringMessage sm = new StringMessage(0, m.getFromId(), msgType, target, m
+                                .getContent());
 
-                        int msgType = m.getType();//确定单播还是组播
                         if (msgType == MsgObject.BRAODCAST.getValue()) {//群发
-                            String targetId = (String) m.getTarget().get("id");
                             sendToGroup(targetId, sm);
                         }
                         else if (msgType == MsgObject.UNICAST.getValue()) {//单发
-                            String targetId = (String) m.getTarget().get("id");
                             sendToUser(targetId, sm);
                         }
                         else {

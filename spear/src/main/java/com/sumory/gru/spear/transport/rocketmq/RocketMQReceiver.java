@@ -1,6 +1,8 @@
 package com.sumory.gru.spear.transport.rocketmq;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
@@ -102,7 +104,7 @@ public class RocketMQReceiver implements IReceiver {
      * @param groupId
      * @param msg
      */
-    private void sendToGroup(Long groupId, BaseMessage msg) {
+    private void sendToGroup(String groupId, BaseMessage msg) {
         logger.info("开始群发, groupId:{} msgId:{}", groupId, msg.getId());
         if (groupId != null) {
             Group group = this.groupMap.get(groupId);
@@ -120,7 +122,7 @@ public class RocketMQReceiver implements IReceiver {
      * @param userId
      * @param msg
      */
-    private void sendToUser(Long userId, BaseMessage msg) {
+    private void sendToUser(String userId, BaseMessage msg) {
         logger.info("开始单发, userId:{} msgId:{}", userId, msg.getId());
         if (userId == null)
             return;
@@ -162,25 +164,30 @@ public class RocketMQReceiver implements IReceiver {
                     public void run() {
                         try {
                             String tags = msg.getTags();//这里是群组id
-                            Long groupId = Long.parseLong(tags);
-                            String msgId = msg.getKeys();
+                            // Long groupId = Long.parseLong(tags);
+                            // String msgId = msg.getKeys();
                             String body = new String(msg.getBody(), "utf8");
                             logger.info("收到的消息属性, topic:{} tags:{} body:{}", msg.getTopic(), tags,
                                     body);
                             MsgObject m = JSONObject.parseObject(body, MsgObject.class);
-                            StringMessage sm = new StringMessage(Long.parseLong(msgId), m
-                                    .getContent());
 
-                            int msgType = m.getType();//确定单播还是组播
+                            int msgType = m.getType();//确定单播还是广播
+                            String targetId = m.getTarget().get("id") + "";
+
+                            Map<String, Object> target = new HashMap<String, Object>();
+                            target.put("id", targetId);
+                            target.put("type", -1);//扩展字段，暂时没用到
+                            StringMessage sm = new StringMessage(0, m.getFromId(), msgType, target,
+                                    m.getContent());
+
                             if (msgType == MsgObject.BRAODCAST.getValue()) {//群发
-                                sendToGroup(groupId, sm);
+                                sendToGroup(targetId, sm);
                             }
                             else if (msgType == MsgObject.UNICAST.getValue()) {//单发
-                                Long targetId = Long.parseLong((String) m.getTarget().get("id"));
                                 sendToUser(targetId, sm);
                             }
                             else {
-                                logger.error("从mq接收到的发送消息的类型错误");
+                                logger.error("接收到的要发送消息的类型错误");
                             }
                         }
                         catch (Exception e) {

@@ -267,6 +267,7 @@ public class SpearServer {
                 try {
                     MsgObject msg = JSONObject.parseObject(data, MsgObject.class);
                     User user = ioClient.get("user");//client对应的user
+                    msg.setFromId(user.getId());//设置发送者id
 
                     int msgType = msg.getType();
                     if (msgType == MsgObject.BRAODCAST.getValue()) {//群发

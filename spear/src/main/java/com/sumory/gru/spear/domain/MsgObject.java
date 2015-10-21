@@ -10,12 +10,12 @@ import com.alibaba.fastjson.JSON;
  * 
  * <pre>
  * {
- *     type: 1, //1 广播，0 单播给指定target
- *     target: { //单播时该字段有效
- *         id: 10, //"用户id"
- *         type: 1 //1指管理员，0指普通用户，详见com.sumory.gru.spear.domain.UserType
+ *     type: 1, //1 广播，0 单播
+ *     target: { // 给指定target
+ *         id: 10, //单播时指目标用户id，广播时指群组id
+ *         type: 1 //扩展字段，暂时无用
  *     },
- *     content: "字符串"
+ *     content: "字符串"//消息内容
  * }
  * 
  * </pre>
@@ -25,6 +25,7 @@ import com.alibaba.fastjson.JSON;
  */
 public class MsgObject {
 
+    private long fromId;//发送者id
     private int type;//类型: 1 广播，0 单播给指定target
     private Map<String, Object> target;
     private String content;
@@ -32,6 +33,14 @@ public class MsgObject {
     public static MsgType UNICAST = MsgType.UNICAST;
     public static MsgType BRAODCAST = MsgType.BRAODCAST;
     public static MsgType MULTICAST = MsgType.MULTICAST;
+
+    public long getFromId() {
+        return fromId;
+    }
+
+    public void setFromId(long fromId) {
+        this.fromId = fromId;
+    }
 
     public int getType() {
         return type;
@@ -74,21 +83,6 @@ public class MsgObject {
         System.out.println(o);
 
         System.out.println(MsgObject.BRAODCAST);
-    }
-
-    public enum MsgType {
-        BRAODCAST(1), UNICAST(0), MULTICAST(2);
-
-        private int value;
-
-        MsgType(int v) {
-            this.value = v;
-        }
-
-        public int getValue() {
-            return this.value;
-        }
-
     }
 
 }

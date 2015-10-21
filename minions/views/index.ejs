@@ -1,282 +1,306 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Gru Spear Front Mock</title>
-	<%- include ./common/meta.ejs %>
+    <title>Gru Spear Front Mock</title>
+    <%- include ./common/meta.ejs %>
 
 </head>
 <body>
-	<%- include ./common/header.ejs %>
+<%- include ./common/header.ejs %>
 
-	<div class="ui error form segment">
-		<div class="ui message">
-			<div class="header">控制台</div>
-			<div class="field" id="console"></div>
-		</div>
-		<div class="five fields">
-			<div class="field">
-				<label>用户id</label> <input id="id" class="input" type="text" placeholder="Type id" value=1 />
-			</div>
-			<div class="field">
-				<label>要订阅的群组(逗号分隔)</label><input id="groupId" class="input" type="text" placeholder="Type class id" value=10 />
-			</div>
-			<div class="field">
-				<label>连接地址</label>
-				<div class="ui dropdown selection" id="url">
-					<div class="text">http://localhost:31001</div>
-					<i class="dropdown icon"></i>
-					<div class="menu">
-						<div class="item" data-value="http://192.168.100.122:31001">http://192.168.100.122:31001</div>
-						<div class="item" data-value="http://localhost:31001">http://localhost:31001</div>
-					</div>
-				</div>
+<div class="ui error form segment">
+    <div class="ui message">
+        <div class="header">控制台</div>
+        <div class="field" id="console"></div>
+    </div>
+    <div class="five fields">
+        <div class="field">
+            <label>用户id</label> <input id="id" class="input" type="text" placeholder="Type id" value=1/>
+        </div>
+        <div class="field">
+            <label>要订阅的群组(逗号分隔)</label><input id="groupId" class="input" type="text" placeholder="Type class id"
+                                              value="10"/>
+        </div>
+        <div class="field">
+            <label>连接地址</label>
 
-			</div>
-			<div class="field">
-			</div>
-		</div>
-		<div class="field">
-			<label>消息</label> <input id="msg" class="input-xlarge" type="text" placeholder="Type something..." value="this is a message" />
-		</div>
-		<div class=" inline field">
-			<i class=" red attention circular small icon"></i> 
-			<span id="status" class="tip_text">多次点击Connect会产生多个连接,正常情况下请勿多次触发Connect</span>
-		</div>
-	</div>
-	
-	<div class="ui  form segment">
-		<h4 class="ui left floated header">
-	      基本操作
-	  	</h4>
-		<div class="inline field">
-			<div onClick="connect()" class="ui green button">连接</div>
-			<div onClick="sendDisconnect()" class="ui red button">断开连接</div>
-			<div id="clearBtn" class="ui yellow button">清空控制台</div>
-			<div onClick="sendUnicastMessage()" class="ui black button">单发给我自己</div>
-			<div onClick="sendBroadcastMessage()" class="ui blue button">群发消息</div>
-		</div>
-		
-		<h4 class="ui left floated header">
-	      全局操作
-	  	</h4>
-		<div class="inline field">
-			<div onClick="sendOnlineMessage()" class="ui blue button">获取当前组在线统计</div>
-		</div>
-	
-	</div>
+            <div class="ui dropdown selection" id="url">
+                <div class="text">http://localhost:31001</div>
+                <i class="dropdown icon"></i>
 
-	<script>
-		$('.ui.dropdown').dropdown();
-	</script>
+                <div class="menu">
+                    <div class="item" data-value="http://192.168.100.122:31001">http://192.168.100.122:31001</div>
+                    <div class="item" data-value="http://localhost:31001">http://localhost:31001</div>
+                </div>
+            </div>
 
-	<script>
-		var userId = Math.floor((Math.random() * 1000) + 1);
-		var userName = userId;
-		var token1,token2;
-		var socket;
+        </div>
+        <div class="field">
+        </div>
+    </div>
+    <div class="field">
+        <label>消息</label> <input id="msg" class="input-xlarge" type="text" placeholder="Type something..."
+                                 value="this is a message"/>
+    </div>
+    <div class=" inline field">
+        <i class=" red attention circular small icon"></i>
+        <span id="status" class="tip_text">多次点击Connect会产生多个连接,正常情况下请勿多次触发Connect</span>
+    </div>
+</div>
 
-		var autoMessageFlag = 0;
-		$("#id").val(userId);
-        userName ="mock_user_"+$("#id").val();
+<div class="ui  form segment">
+    <h4 class="ui left floated header">
+        基本操作
+    </h4>
 
-		function connect() {
-			var url = $("#url").dropdown("get value");
-			var userType=$("#userType").dropdown("get value");
+    <div class="inline fields">
+        <div class="field">
+            <div onClick="connect()" class="ui green button">连接</div>
+            <div onClick="sendDisconnect()" class="ui red button">断开连接</div>
+            <div id="clearBtn" class="ui yellow button">清空控制台</div>
+            <div onClick="sendUnicastMessage()" class="ui black button">单发给我自己</div>
+        </div>
 
-			updateStatus("尝试连接" + url);
+        <div class="field">
+            <div class="ui dropdown selection" id="groupIdToSend" style="min-width:150px;width:150px;">
+                <div class="text">群组id</div>
+                <i class="dropdown icon"></i>
 
-			$.ajax({//生成token
-				url: '/mock/genToken/',
-				type: 'get',
-				data: {
-					userId: $("#id").val(),
-					userName: userName
-				},
-				dataType: 'json',
-				success: function (result) {
-					//console.dir(result);
-					if (result.success) {
-						token1 = result.token1;
-						token2 = result.token2;
-						socket = io.connect(url, {
-							"reconnect" : true,
-							"auto connect" : true,
-							"force new connection" : true
-						});
-
-						initSocket(socket);
-					}
-				},
-				error: function () {
-					console.log('error');
-				}
-			});
-		}
+                <div class="menu">
+                    <div class="item" data-value="0">群组id</div>
+                </div>
+            </div>
+            <div onClick="sendBroadcastMessage()" class="ui blue button">群发消息</div>
+        </div>
+    </div>
 
 
-		function initSocket(socket){
-			socket.on("connect_error",function(error){
-				console.dir(error);
-			});
+    <h4 class="ui left floated header">
+        全局操作
+    </h4>
 
-			socket.on('connect',function() {
-				var userType=$("#userType").dropdown("get value");
-				updateStatus("连接成功" + url);
-				output('<span class="connect-msg">Client has connected to the server!</span>');
-				socket.emit('auth', JSON.stringify({
-					id : $("#id").val(),
-					name : userName,
-					token1 : token1,
-					token2 : token2
-				}));
-			});
+    <div class="inline field">
+        <div onClick="sendOnlineMessage()" class="ui blue button">获取当前组在线统计</div>
+    </div>
 
-			socket.on('auth_result', function(data) {
-				output('授权结果：' + JSON.stringify(data));
-                updateStatus("连接成功");
+</div>
 
-                var groups = $("#groupId").val();
-                if(!groups){
-                    updateStatus("未订阅群组");
-                    return;
+<script>
+    $('.ui.dropdown').dropdown();
+</script>
+
+<script>
+    var userId = Math.floor((Math.random() * 1000) + 1);
+    var userName = userId;
+    var token1, token2;
+    var socket;
+
+    var autoMessageFlag = 0;
+    $("#id").val(userId);
+    userName = "mock_user_" + $("#id").val();
+
+    function connect() {
+        var url = $("#url").dropdown("get value");
+        var userType = $("#userType").dropdown("get value");
+
+        updateStatus("尝试连接" + url);
+
+        $.ajax({//生成token
+            url: '/mock/genToken/',
+            type: 'get',
+            data: {
+                userId: $("#id").val(),
+                userName: userName
+            },
+            dataType: 'json',
+            success: function (result) {
+                //console.dir(result);
+                if (result.success) {
+                    token1 = result.token1;
+                    token2 = result.token2;
+                    socket = io.connect(url, {
+                        "reconnect": true,
+                        "auto connect": true,
+                        "force new connection": true
+                    });
+
+                    initSocket(socket);
                 }
-
-
-
-                var groupIds = groups.split(",");
-
-                var subscribeGroups = [];
-                for(var i in groupIds){
-                    if(isNum(groupIds[i])){
-                        var gid = parseInt(groupIds[i],10);
-                        subscribeGroups.push({
-                            id:gid,
-                            name:"群组"+gid
-                        });
-                    }
-                }
-
-
-
-                if(subscribeGroups.length>0){
-                    socket.emit('subscribe', JSON.stringify({
-                        userId : parseInt($("#id").val(),10),
-                        // subscribeGroups:subscribeGroups
-                        subscribeGroups:subscribeGroups
-                    }));
-                }
-
-
-
-			});
-
-			//订阅群组的回调
-			socket.on('subscribe_result',function(data) {
-				output("订阅成功："+JSON.stringify(data));
-			});
-
-			//获取到的在线人
-			socket.on('online_result',function(data) {
-				output("在线人："+JSON.stringify(data));
-			});
-
-
-			socket.on('msg', function(msg) {
-				console.log(msg);
-				var data = {};
-				try {
-
-					data = JSON.parse(msg.content);
-				} catch (e) {
-					data = msg;
-				}
-
-				if (data.userName) {
-					if (data.userName == userName)
-						data.userName = "我";
-					output('<span class="username-msg">' + data.userName
-					+ ':</span> ' + data.message);
-				} else
-					output('收到消息：' + JSON.stringify(data));
-			});
-
-			socket.on('disconnect',function() {
-				updateStatus("连接断开");
-				output('<span class="disconnect-msg">The client has disconnected!</span>');
-				//socket = io.reconnect();
-			});
-		}
-
-		function sendDisconnect() {
-			socket.disconnect();
-		}
-
-		function sendBroadcastMessage() {
-			autoMessageFlag++;
-			var message = $('#msg').val();
-			$('#msg').val(message + '__' + autoMessageFlag);
-
-			var msg ={
-				type: 1, //1 广播，0 单播给指定target
-				target: {},
-				content: message
-			};
-
-			socket.emit('msg', JSON.stringify(msg));
-		}
-
-		function sendUnicastMessage() {
-			autoMessageFlag++;
-			var message = $('#msg').val();
-			$('#msg').val(message + '__' + autoMessageFlag);
-
-			var msg ={
-				type: 0, //1 广播，0 单播给指定target
-				target: {
-					id: $("#id").val()
-				},
-				content: message
-			};
-
-
-			socket.emit('msg', JSON.stringify(msg));
-		}
-
-		//发送“在线列表”查询请求
-		function sendOnlineMessage() {
-			socket.emit('online', $("#groupId").val());
-		}
-
-		$("#clearBtn").click(function() {
-			$("#console").html("");
-			$("#msg").val("this is message");
-		});
-
-		function updateStatus(status) {
-			$("#status").html(status)
-		}
-
-		function output(message) {
-			var currentTime = "<span class='time'>"+ moment().format('HH:mm:ss.SSS') + "</span>";
-			var element = $("<div>" + currentTime + " " + message + "</div>");
-			$('#console').append(element);
-			document.querySelector("#console").scrollTop = document.querySelector("#console").scrollHeight;
-		}
-
-        //判断是否为数字
-        function isNum(s){
-            if (s!=null && s!=""){
-                return !isNaN(s);
+            },
+            error: function () {
+                console.log('error');
             }
-            return false;
+        });
+    }
+
+
+    function initSocket(socket) {
+        socket.on("connect_error", function (error) {
+            console.dir(error);
+        });
+
+        socket.on('connect', function () {
+            var userType = $("#userType").dropdown("get value");
+            updateStatus("连接成功" + url);
+            output('<span class="connect-msg">Client has connected to the server!</span>');
+            socket.emit('auth', JSON.stringify({
+                id: $("#id").val(),
+                name: userName,
+                token1: token1,
+                token2: token2
+            }));
+        });
+
+        socket.on('auth_result', function (data) {
+            output('授权结果：' + JSON.stringify(data));
+            updateStatus("连接成功");
+
+            var groups = $("#groupId").val();
+            if (!groups) {
+                updateStatus("未订阅群组");
+                return;
+            }
+
+
+            var groupIds = groups.split(",");
+
+            var subscribeGroups = [];
+
+            $("#groupIdToSend .menu").html("");
+            for (var i in groupIds) {
+                if (isNum(groupIds[i])) {
+                    var gid = parseInt(groupIds[i], 10);
+                    subscribeGroups.push({
+                        id: gid,
+                        name: "群组" + gid
+                    });
+
+                    $("#groupIdToSend .menu").append('<div class="item" data-value="' +gid+ '">' +("群组" + gid)+ '</div>');
+                }
+            }
+
+
+            if (subscribeGroups.length > 0) {
+                socket.emit('subscribe', JSON.stringify({
+                    userId: parseInt($("#id").val(), 10),
+                    // subscribeGroups:subscribeGroups
+                    subscribeGroups: subscribeGroups
+                }));
+            }
+
+
+        });
+
+        //订阅群组的回调
+        socket.on('subscribe_result', function (data) {
+            output("订阅成功：" + JSON.stringify(data));
+        });
+
+        //获取到的在线人
+        socket.on('online_result', function (data) {
+            output("在线人：" + JSON.stringify(data));
+        });
+
+
+        socket.on('msg', function (msg) {
+            console.log(msg);
+            var data = {};
+            try {
+
+                data = JSON.parse(msg.content);
+            } catch (e) {
+                data = msg;
+            }
+
+            if (data.userName) {
+                if (data.userName == userName)
+                    data.userName = "我";
+                output('<span class="username-msg">' + data.userName
+                        + ':</span> ' + data.message);
+            } else
+                output('收到消息：' + JSON.stringify(data));
+        });
+
+        socket.on('disconnect', function () {
+            updateStatus("连接断开");
+            output('<span class="disconnect-msg">The client has disconnected!</span>');
+            //socket = io.reconnect();
+        });
+    }
+
+    function sendDisconnect() {
+        socket.disconnect();
+    }
+
+    function sendBroadcastMessage() {
+        var targetGroupId = $("#groupIdToSend").dropdown("get value");
+
+        autoMessageFlag++;
+        var message = $('#msg').val();
+        $('#msg').val(message + '__' + autoMessageFlag);
+
+        var msg = {
+            type: 1, //1 广播，0 单播给指定target
+            target: {
+                id:targetGroupId
+            },
+            content: message
+        };
+
+        socket.emit('msg', JSON.stringify(msg));
+    }
+
+    function sendUnicastMessage() {
+        autoMessageFlag++;
+        var message = $('#msg').val();
+        $('#msg').val(message + '__' + autoMessageFlag);
+
+        var msg = {
+            type: 0, //1 广播，0 单播给指定target
+            target: {
+                id: $("#id").val()
+            },
+            content: message
+        };
+
+
+        socket.emit('msg', JSON.stringify(msg));
+    }
+
+    //发送“在线列表”查询请求
+    function sendOnlineMessage() {
+        socket.emit('online', $("#groupId").val());
+    }
+
+    $("#clearBtn").click(function () {
+        $("#console").html("");
+        $("#msg").val("this is message");
+    });
+
+    function updateStatus(status) {
+        $("#status").html(status)
+    }
+
+    function output(message) {
+        var currentTime = "<span class='time'>" + moment().format('HH:mm:ss.SSS') + "</span>";
+        var element = $("<div>" + currentTime + " " + message + "</div>");
+        $('#console').append(element);
+        document.querySelector("#console").scrollTop = document.querySelector("#console").scrollHeight;
+    }
+
+    //判断是否为数字
+    function isNum(s) {
+        if (s != null && s != "") {
+            return !isNaN(s);
         }
+        return false;
+    }
 
-		//导航选中
-		$("#header-navigate a[data-tab=first]").addClass("active");
-	</script>
+    //导航选中
+    $("#header-navigate a[data-tab=first]").addClass("active");
+</script>
 
 
-
-	<%- include ./common/sidebar.ejs %>
+<%- include ./common/sidebar.ejs %>
 </body>
 </html>
