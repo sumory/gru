@@ -23,7 +23,7 @@
 	<dependencies>
 	        <!-- 内部依赖包 -->
 		<dependency>
-			<groupId>gru</groupId>
+			<groupId>com.sumory.gru</groupId>
 			<artifactId>common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>

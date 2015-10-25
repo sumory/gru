@@ -11,16 +11,14 @@
 	<name>gru</name>
 	<url>https://github.com/sumory/gru</url>
 	<modules>
-		<module>spear-client</module>
 		<module>spear</module>
 		<module>ticket</module>
-		<module>minions</module>
 		<module>common</module>
 		<module>stat</module>
 		<module>idgen</module>
 	</modules>
 
-	<distributionManagement>
+	<!-- <distributionManagement>
 		<snapshotRepository>
 			<id>nexus-snapshots</id>
 			<name>Nexus Snapshot Repository</name>
@@ -48,7 +46,7 @@
 			<name>Public Repositories</name>
 			<url>http://192.168.100.174:8081/nexus/content/groups/public/</url>
 		</pluginRepository>
-	</pluginRepositories>
+	</pluginRepositories> -->
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

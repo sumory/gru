@@ -21,7 +21,23 @@
 - 单节点可服务10W+以上长连接，具体为在不断发消息的情况下(1000条/秒)，单长连接服务节点支持的稳定连接数量在10W+(8核16G)
 
 
+##### 安装部署
+
+首先clone代码
+
+###### 最小安装
+
+
+###### 集群方式
+
+
 ##### 监控后台screenshots
 
-![](docs/dashboard-client.png)
-![](docs/dashboard-monitor.png)
+<table>
+    <tr>
+        <td width="50%"><img src="docs/dashboard-client.png"/></td>
+        <td width="50%"><img src="docs/dashboard-monitor.png"/></td>
+    </tr>
+</table>
+
+

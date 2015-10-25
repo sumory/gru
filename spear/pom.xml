@@ -21,20 +21,31 @@
 
 	<dependencies>
 		<!-- 内部依赖包 -->
+		<!-- <dependency> <groupId>gru</groupId> <artifactId>common</artifactId> 
+			<version>0.0.1-SNAPSHOT</version> </dependency> <dependency> <groupId>gru</groupId> 
+			<artifactId>stat</artifactId> <version>0.0.1-SNAPSHOT</version> </dependency> 
+			<dependency> <groupId>gru</groupId> <artifactId>idgen</artifactId> <version>0.0.1-SNAPSHOT</version> 
+			</dependency> -->
+
+
 		<dependency>
-			<groupId>gru</groupId>
+			<groupId>com.sumory.gru</groupId>
 			<artifactId>common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+
+
 		<dependency>
-			<groupId>gru</groupId>
+			<groupId>com.sumory.gru</groupId>
 			<artifactId>stat</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
+
+
 		<dependency>
-			<groupId>gru</groupId>
+			<groupId>com.sumory.gru</groupId>
 			<artifactId>idgen</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -63,20 +74,20 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			</dependency>
+		</dependency>
 
 		<dependency>
 			<groupId>com.alibaba.rocketmq</groupId>
 			<artifactId>rocketmq-client</artifactId>
 			<version>3.2.6</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>redis.clients</groupId>
 			<artifactId>jedis</artifactId>
 			<version>2.5.1</version>
 		</dependency>
-		
+
 
 
 		<dependency>
@@ -317,6 +328,6 @@
 				</resources>
 			</build>
 		</profile>
-		
+
 	</profiles>
 </project>
