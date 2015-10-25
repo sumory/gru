@@ -41,7 +41,7 @@ git clone https://github.com/sumory/gru.git /data/tmp/gru
 
 ##### 最小安装，单点部署
 
-如果只想体验单节点的部署模式，不需要监控、负载均衡及其它业务服务，只需要部署一个spear节点即可。
+如果只想体验单节点的部署模式，不需要监控、负载均衡及其它业务服务，只需要部署一个spear节点即可。部署方式如下：
 
 ```
 cd /data/tmp/gru
@@ -49,8 +49,14 @@ mvn install #本地安装
 cd spear
 mvn clean package -Pdev #生成spear可运行包，使用dev的配置文件
 cd target/release #该目录下有所有spear运行需要的文件
+ll conf # 主要配置文件位于conf/system.properties下，默认以single模式运行，不依赖zookeepe/redis等
+sh bin/start.sh # 启动
 
 ```
+以上步骤完成后即可在本地的31001端口开启一个spear实例监听，等待客户端连接。
+
+若想查看如何使用该spear实例，请移步[gru-example](https://github.com/sumory/gru-example),启动该项目，访问http://127.0.0.1:60000即可。
+
 
 ##### 集群方式部署
 
