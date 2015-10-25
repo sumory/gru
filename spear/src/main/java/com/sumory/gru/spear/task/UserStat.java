@@ -148,7 +148,7 @@ public class UserStat {
 
     //定时任务
     public void run() {
-        if ("true".equals(this.context.getConfig().get("stat.start"))) {
+        if ("true".equals(this.context.getConfig().get("stat.start"))) {//如果开启了统计服务
             ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
             executor.scheduleAtFixedRate(new Runnable() {
                 @Override

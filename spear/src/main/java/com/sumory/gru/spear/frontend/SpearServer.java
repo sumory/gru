@@ -44,13 +44,14 @@ import com.sumory.gru.spear.transport.ISender;
 import com.sumory.gru.stat.service.StatService;
 
 /**
- * * 长连接接入server
+ * 长连接接入server
  * 
  * <p>
  * <b>TODO:</b>
  * <p/>
  * <ul>
  * <li>每个用户级别应该有有限个客户端连接</li>
+ * <li>增加multicast支持</li>
  * </ul>
  * 
  * 
@@ -401,10 +402,10 @@ public class SpearServer {
         });
 
         server.start();
-        Configuration sConfiguration = server.getConfiguration();
-        logger.info("bossThreads:{}, workerThreads:{}, socketConfig:{}",
-                sConfiguration.getBossThreads(), sConfiguration.getWorkerThreads(),
-                JSON.toJSONString(sConfiguration.getSocketConfig(), true));
+        //Configuration sConfiguration = server.getConfiguration();
+        //logger.info("bossThreads:{}, workerThreads:{}, socketConfig:{}",
+        //      sConfiguration.getBossThreads(), sConfiguration.getWorkerThreads(),
+        //      JSON.toJSONString(sConfiguration.getSocketConfig(), true));
         logger.info("SpearServer is running...");
     }
 }

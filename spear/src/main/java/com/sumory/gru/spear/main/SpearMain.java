@@ -11,6 +11,8 @@ import com.sumory.gru.idgen.service.IdService;
 import com.sumory.gru.spear.SpearContext;
 import com.sumory.gru.spear.frontend.SpearServer;
 import com.sumory.gru.spear.monitor.MonitorServer;
+import com.sumory.gru.spear.service.InnerIdService;
+import com.sumory.gru.spear.service.InnerStatService;
 import com.sumory.gru.spear.task.UserStat;
 import com.sumory.gru.spear.transport.IReceiver;
 import com.sumory.gru.spear.transport.ISender;
@@ -31,53 +33,45 @@ import com.sumory.gru.stat.service.StatService;
  */
 public class SpearMain {
     private final static Logger logger = LoggerFactory.getLogger(SpearMain.class);
+    private final static String DEFAULT_MODE = "single";//集群节点间通信模式、集群部署模式，详见配置文件描述
 
     public static void main(String[] args) {
         final SpearContext context = SpearContext.getInstance();
-        Map<String, String> config = context.getConfig();
+        final Map<String, String> config = context.getConfig();
+        final IdService idService;
+        final StatService statService;
 
-        //加载依赖的外部service
         try {
-            @SuppressWarnings("resource")
-            ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[] {
-                    "applicationContext.xml", "applicationContext-consumer-idgen.xml",
-                    "applicationContext-consumer-stat.xml" });
-            IdService idService = (IdService) appContext.getBean("idService");
-            StatService statService = (StatService) appContext.getBean("statService");
+            if (DEFAULT_MODE.equals(config.get("mode"))) {//最小化部署single模式时使用本地实现的两个service
+                idService = new InnerIdService();
+                statService = new InnerStatService();//最小化模式不提供stat服务，所以这个接口没有具体实现，后面也不会被调用到
+            }
+            else {//开启了集群模式服务
+                ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[] {
+                        "applicationContext.xml", "applicationContext-consumer-idgen.xml",
+                        "applicationContext-consumer-stat.xml" });
+                idService = (IdService) appContext.getBean("idService");
+                statService = (StatService) appContext.getBean("statService");
+
+            }
+
+            logger.info("idgen service version:{} ", idService.getServiceVersion());
+            logger.info("stat service version:{}", statService.getServiceVersion());
             context.setIdService(idService);
             context.setStatService(statService);
-            logger.info("idgen service version:{}, generate a demo id:{} ",
-                    idService.getServiceVersion(), idService.getMsgId());
-            logger.info("stat service version:{}", statService.getServiceVersion());
         }
         catch (Exception e) {
-            logger.error("连接dubbo service出错", e);
-            //System.exit(-1);
-        }
-
-        //启动zk，注册本节点
-        try {
-            int sessionTimeout = 3000;
-            int retryTimes = 10;
-            String zkHost = config.get("zk.addr");
-            String baseNode = config.get("zk.spear.cluster");
-            String outAddr = config.get("out.addr");//每个spear节点此值需唯一
-            String spearId = config.get("spear.id");//每个spear节点此值需唯一
-            ZkUtil.initNode(zkHost, baseNode, outAddr, spearId, sessionTimeout, retryTimes);
-        }
-        catch (Exception e) {
-            logger.error("在zookeeper上新建spear节点出错", e);
+            logger.error("spear服务启动出错", e);
             System.exit(-1);
         }
 
         //启动队列服务，启动节点长连接服务
         try {
-
             ISender sender;
             IReceiver receiver;
             String mode = config.get("mode");
             switch (mode) {
-            case "inner":
+            case DEFAULT_MODE:
                 sender = new InnerSender(context);
                 receiver = new InnerReceiver(context);
                 break;
@@ -112,13 +106,26 @@ public class SpearMain {
             System.exit(-1);
         }
 
-        //启动节点信息统计上报服务
-        try {
-            UserStat userStat = new UserStat(context);
-            userStat.run();
-        }
-        catch (Exception e) {
-            logger.error("开始状态统计出错", e);
+        //注册本节点到zookeeper，启动节点信息上报服务
+        if (!DEFAULT_MODE.equals(config.get("mode"))) {
+            try {
+                //启动zk，注册本节点
+                int sessionTimeout = 3000;
+                int retryTimes = 10;
+                String zkHost = config.get("zk.addr");
+                String baseNode = config.get("zk.spear.cluster");
+                String outAddr = config.get("out.addr");//每个spear节点此值需唯一
+                String spearId = config.get("spear.id");//每个spear节点此值需唯一
+                ZkUtil.initNode(zkHost, baseNode, outAddr, spearId, sessionTimeout, retryTimes);
+
+                //启动节点信息统计上报服务
+                UserStat userStat = new UserStat(context);
+                userStat.run();
+            }
+            catch (Exception e) {
+                logger.error("在zk上注册服务、开启上报服务出错", e);
+                System.exit(-1);
+            }
         }
 
         //死锁等待
