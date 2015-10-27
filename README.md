@@ -60,7 +60,7 @@ sh bin/start.sh # 启动
 
 ##### 集群方式部署
 
-集群的安装配置较为复杂，详见[Gru集群安装配置](docs/install_cluster.md)
+集群的安装配置较为复杂，详见[Gru集群安装配置](docs/cluster_install.md)
 
 
 #### 监控后台screenshots
