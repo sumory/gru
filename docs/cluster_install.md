@@ -13,7 +13,7 @@
 <b>注意：</b>
 
 - 部署集群前需先安装好zookeeper、redis，并安装JRE7+和Node.js运行环境。
-- 用户应特别注意每个模块的配置文件，将其中的机器ip、端口等改为要部署的机器的对应配置。
+- 用户应特别注意每个模块的配置文件，**将其中机器的ip、端口等改为要部署的机器对应的配置**。
 
 
 #### 1. 部署idgen服务
@@ -129,6 +129,33 @@ mvn clean package -Ptest2 #以src/main/resources/profiles/test2的配置文件�
 cd target/release #release目录是运行所需要的所有文件
 sh bin/start.sh
 ```
+
+#### 5. 部署监控模块minions
+
+minions是一个Node.js构建的监控后台，它依赖于zookeeper、redis和stat服务的一些API来获取数据，目前主要有两个功能：
+
+- 模拟客户端：可模拟一个用户，或者订阅某些群组，来查看当前用户或者群组内正在发送和接受的消息。
+- 通过zookeeper和redis来获取整个集群信息。
+
+部署：
+
+```
+cd minions
+npm install . #安装该模块依赖的第三方库
+vim config/test.js # 修改config目录下的test配置文件为集群对应的配置
+NODE_ENV=test node app.js #使用config/test.js配置启动程序,访问http://ip:40000来查看监控信息
+
+```
+
+效果图如下：
+
+<table>
+    <tr>
+        <td width="50%"><img src="./dashboard-client.png"/></td>
+        <td width="50%"><img src="./dashboard-monitor.png"/></td>
+    </tr>
+</table>
+
 
 
 #### 总结
