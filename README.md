@@ -49,7 +49,7 @@ mvn install #本地安装
 cd spear
 mvn clean package -Pdev #生成spear可运行包，使用dev的配置文件
 cd target/release #该目录下有所有spear运行需要的文件
-ll conf # 主要配置文件位于conf/system.properties下，默认以single模式运行，不依赖zookeepe/redis等
+ll conf # 主要配置文件位于conf/system.properties下，默认以single模式运行，不依赖zookeeper/redis等
 sh bin/start.sh # 启动
 
 ```
