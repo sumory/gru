@@ -1,29 +1,22 @@
 package com.sumory.gru.idgen.main;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
-import com.alibaba.dubbo.common.logger.Logger;
-import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.ConfigUtils;
 import com.alibaba.dubbo.container.Container;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class IdGenMain {
-
     public static final String CONTAINER_KEY = "dubbo.container";
-
     public static final String SHUTDOWN_HOOK_KEY = "dubbo.shutdown.hook";
-
     private static final Logger logger = LoggerFactory.getLogger(IdGenMain.class);
-
     private static final ExtensionLoader<Container> loader = ExtensionLoader
             .getExtensionLoader(Container.class);
-
     private static volatile boolean running = true;
 
     public static void main(String[] args) {
@@ -48,8 +41,7 @@ public class IdGenMain {
                                 container.stop();
                                 logger.info("Dubbo " + container.getClass().getSimpleName()
                                         + " stopped!");
-                            }
-                            catch (Throwable t) {
+                            } catch (Throwable t) {
                                 logger.error(t.getMessage(), t);
                             }
                             synchronized (IdGenMain.class) {
@@ -65,10 +57,8 @@ public class IdGenMain {
                 container.start();
                 logger.info("Dubbo " + container.getClass().getSimpleName() + " started!");
             }
-            System.out.println(new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]").format(new Date())
-                    + " Dubbo gru-provider-idgen-service server started!");
-        }
-        catch (RuntimeException e) {
+            logger.info("Dubbo gru-idgen-service server started!");
+        } catch (RuntimeException e) {
             e.printStackTrace();
             logger.error(e.getMessage(), e);
             System.exit(1);
@@ -77,8 +67,7 @@ public class IdGenMain {
             while (running) {
                 try {
                     IdGenMain.class.wait();
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                 }
             }
         }

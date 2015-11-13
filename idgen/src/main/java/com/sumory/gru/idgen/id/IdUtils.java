@@ -1,8 +1,8 @@
 package com.sumory.gru.idgen.id;
 
-import com.alibaba.dubbo.common.logger.Logger;
-import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.sumory.gru.common.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * id生成工具

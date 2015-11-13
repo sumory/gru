@@ -22,6 +22,8 @@ import io.netty.util.internal.logging.Log4JLoggerFactory;
 import java.io.IOException;
 
 import com.sumory.gru.common.config.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 使用一致性hash，防止抖动
@@ -30,11 +32,14 @@ import com.sumory.gru.common.config.Config;
  * @date 2015年2月4日 上午10:07:08
  */
 public class TicketServer {
-    static {
-        InternalLoggerFactory.setDefaultFactory(new Log4JLoggerFactory());
-    }
-    private static final InternalLogger logger = InternalLoggerFactory
-            .getInstance(TicketServer.class);
+//    static {
+//        InternalLoggerFactory.setDefaultFactory(new Log4JLoggerFactory());
+//    }
+//    private static final InternalLogger logger = InternalLoggerFactory
+//            .getInstance(TicketServer.class);
+
+    private static final Logger logger = LoggerFactory.getLogger(TicketServer.class);
+
 
     // 配置服务端的NIO线程组
     private EventLoopGroup bossGroup = new NioEventLoopGroup();

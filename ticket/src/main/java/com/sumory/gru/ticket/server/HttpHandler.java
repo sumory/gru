@@ -39,10 +39,12 @@ import com.sumory.gru.common.utils.TokenUtil;
 import com.sumory.gru.ticket.common.Node;
 import com.sumory.gru.ticket.domain.Ticket;
 import com.sumory.gru.ticket.main.TicketMain;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpHandler extends SimpleChannelInboundHandler<HttpObject> {
-    private static final InternalLogger logger = InternalLoggerFactory
-            .getInstance(HttpHandler.class);
+    private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
+
     private HttpRequest request;
     private final String hello = "welcome, this is Ticket server...";
 

@@ -1,25 +1,22 @@
 package com.sumory.gru.stat.main;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
-
 import com.alibaba.dubbo.common.Constants;
 import com.alibaba.dubbo.common.extension.ExtensionLoader;
-import com.alibaba.dubbo.common.logger.Logger;
-import com.alibaba.dubbo.common.logger.LoggerFactory;
 import com.alibaba.dubbo.common.utils.ConfigUtils;
 import com.alibaba.dubbo.container.Container;
 import com.sumory.gru.common.config.Config;
 import com.sumory.gru.stat.context.StatContext;
 import com.sumory.gru.stat.servlet.StatServlet;
 import com.sumory.gru.stat.zk.ZkUtil;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class StatMain {
     private static final Logger logger = LoggerFactory.getLogger(StatMain.class);
@@ -40,8 +37,7 @@ public class StatMain {
             int sessionTimeout = 3000;
             int retryTimes = 10;
             ZkUtil.initListener(zkHost, baseNode, sessionTimeout, retryTimes, context);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("zk监听异常", e);
             System.exit(1);
         }
@@ -68,8 +64,7 @@ public class StatMain {
                                 container.stop();
                                 logger.info("Dubbo " + container.getClass().getSimpleName()
                                         + " stopped!");
-                            }
-                            catch (Throwable t) {
+                            } catch (Throwable t) {
                                 logger.error(t.getMessage(), t);
                             }
                             synchronized (StatMain.class) {
@@ -85,10 +80,8 @@ public class StatMain {
                 container.start();
                 logger.info("Dubbo " + container.getClass().getSimpleName() + " started!");
             }
-            System.out.println(new SimpleDateFormat("[yyyy-MM-dd HH:mm:ss]").format(new Date())
-                    + " Dubbo gru-stat-service server started!");
-        }
-        catch (RuntimeException e) {
+            logger.info("Dubbo gru-stat-service server started!");
+        } catch (RuntimeException e) {
             e.printStackTrace();
             logger.error(e.getMessage(), e);
             System.exit(1);
@@ -105,8 +98,7 @@ public class StatMain {
             context.addServlet(new ServletHolder(new StatServlet()), "/*");
             server.start();
             server.join();
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -114,8 +106,7 @@ public class StatMain {
             while (running) {
                 try {
                     StatMain.class.wait();
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                 }
             }
         }

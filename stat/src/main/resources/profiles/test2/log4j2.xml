@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <properties>
+        <property name="LOG_HOME">/data/logs/stat</property>
+        <property name="GLOBAL_PATTERN">[%d{MM-dd HH:mm:ss.SSS}] [%p] %l - %msg%n</property>
+    </properties>
+
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${GLOBAL_PATTERN}"/>
+        </Console>
+
+        <!-- 全部日志 -->
+        <RollingRandomAccessFile name="AllLog"
+                                 fileName="${LOG_HOME}/all.log"
+                                 filePattern="${LOG_HOME}/all.%d{yyyy-MM-dd}.log" append="true">
+            <PatternLayout pattern="${GLOBAL_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingRandomAccessFile>
+
+        <!-- 自定义日志 -->
+        <RollingRandomAccessFile name="AppLog"
+                                 fileName="${LOG_HOME}/app.log"
+                                 filePattern="${LOG_HOME}/app.%d{yyyy-MM-dd}.log">
+            <PatternLayout pattern="${GLOBAL_PATTERN}"/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingRandomAccessFile>
+
+    </Appenders>
+    <Loggers>
+        <Root level="debug" includeLocation="true">
+            <appender-ref ref="Console"/>
+            <appender-ref ref="AllLog"/>
+        </Root>
+
+        <!-- 3rdparty Loggers -->
+        <logger name="org.springframework" level="info"></logger>
+        <logger name="org.apache.zookeeper" level="info"></logger>
+        <logger name="io.netty" level="info"></logger>
+        <logger name="org.apache.http" level="warn"></logger>
+        <logger name="com.mchange.v2" level="warn"></logger>
+        <logger name="com.alibaba.dubbo" level="debug"></logger>
+        <logger name="org.eclipse.jetty" level="info"></logger>
+
+        <!-- app logger: additivity为false，则Root Logger不会记录-->
+        <logger name="com.sumory" level="debug" additivity="true">
+            <appender-ref ref="AppLog"/>
+        </logger>
+    </Loggers>
+</Configuration>

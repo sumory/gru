@@ -21,29 +21,16 @@
 
 	<dependencies>
 		<!-- 内部依赖包 -->
-		<!-- <dependency> <groupId>gru</groupId> <artifactId>common</artifactId> 
-			<version>0.0.1-SNAPSHOT</version> </dependency> <dependency> <groupId>gru</groupId> 
-			<artifactId>stat</artifactId> <version>0.0.1-SNAPSHOT</version> </dependency> 
-			<dependency> <groupId>gru</groupId> <artifactId>idgen</artifactId> <version>0.0.1-SNAPSHOT</version> 
-			</dependency> -->
-
-
 		<dependency>
 			<groupId>com.sumory.gru</groupId>
 			<artifactId>common</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>com.sumory.gru</groupId>
 			<artifactId>stat</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
-
-
-
 		<dependency>
 			<groupId>com.sumory.gru</groupId>
 			<artifactId>idgen</artifactId>
@@ -57,12 +44,30 @@
 			<artifactId>junit</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+		</dependency>
+
+
+		<!--日志-->
+		<!-- slf4j -->
+		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
+		<!-- log4j2 -->
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+		</dependency>
+		<!-- log4j-slf4j-impl -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
 
 		<!-- 私有依赖包 -->
@@ -105,7 +110,14 @@
 			<groupId>com.github.sgroschupf</groupId>
 			<artifactId>zkclient</artifactId>
 			<version>0.1</version>
+            <!--<exclusions>-->
+                    <!--<exclusion>-->
+                        <!--<groupId>log4j</groupId>-->
+                        <!--<artifactId>log4j</artifactId>-->
+                    <!--</exclusion>-->
+            <!--</exclusions>-->
 		</dependency>
+
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>dubbo</artifactId>
@@ -116,6 +128,11 @@
 					<artifactId>spring</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.curator</groupId>
+			<artifactId>curator-framework</artifactId>
+			<version>1.1.10</version>
 		</dependency>
 
 
