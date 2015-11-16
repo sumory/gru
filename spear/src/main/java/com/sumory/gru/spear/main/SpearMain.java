@@ -79,7 +79,7 @@ public class SpearMain {
                 sender = new RedisSender(context);
                 receiver = new RedisReceiver(context);
                 break;
-            case "roketmq":
+            case "rocketmq":
                 sender = new RocketMQSender(context);
                 receiver = new RocketMQReceiver(context);
                 break;

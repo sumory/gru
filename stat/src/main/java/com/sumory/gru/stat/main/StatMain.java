@@ -82,7 +82,6 @@ public class StatMain {
             }
             logger.info("Dubbo gru-stat-service server started!");
         } catch (RuntimeException e) {
-            e.printStackTrace();
             logger.error(e.getMessage(), e);
             System.exit(1);
         }
@@ -99,7 +98,7 @@ public class StatMain {
             server.start();
             server.join();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("启动Http service失败", e);
         }
 
         synchronized (StatMain.class) {
