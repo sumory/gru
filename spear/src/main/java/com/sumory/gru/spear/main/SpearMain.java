@@ -27,7 +27,7 @@ import com.sumory.gru.stat.service.StatService;
 
 /**
  * 启动入口
- * 
+ *
  * @author sumory.wu
  * @date 2015年1月14日 下午8:07:00
  */
@@ -40,16 +40,16 @@ public class SpearMain {
         final Map<String, String> config = context.getConfig();
         final IdService idService;
         final StatService statService;
+        final SpearServer spearServer;
 
         try {
             if (DEFAULT_MODE.equals(config.get("mode"))) {//最小化部署single模式时使用本地实现的两个service
                 idService = new InnerIdService();
                 statService = new InnerStatService();//最小化模式不提供stat服务，所以这个接口没有具体实现，后面也不会被调用到
-            }
-            else {//开启了集群模式服务
-                ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[] {
+            } else {//开启了集群模式服务
+                ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{
                         "applicationContext.xml", "applicationContext-consumer-idgen.xml",
-                        "applicationContext-consumer-stat.xml" });
+                        "applicationContext-consumer-stat.xml"});
                 idService = (IdService) appContext.getBean("idService");
                 statService = (StatService) appContext.getBean("statService");
 
@@ -59,8 +59,7 @@ public class SpearMain {
             logger.info("stat service version:{}", statService.getServiceVersion());
             context.setIdService(idService);
             context.setStatService(statService);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("spear服务启动出错", e);
             System.exit(-1);
         }
@@ -71,26 +70,26 @@ public class SpearMain {
             IReceiver receiver;
             String mode = config.get("mode");
             switch (mode) {
-            case DEFAULT_MODE:
-                sender = new InnerSender(context);
-                receiver = new InnerReceiver(context);
-                break;
-            case "redis":
-                sender = new RedisSender(context);
-                receiver = new RedisReceiver(context);
-                break;
-            case "rocketmq":
-                sender = new RocketMQSender(context);
-                receiver = new RocketMQReceiver(context);
-                break;
-            default:
-                sender = new InnerSender(context);
-                receiver = new InnerReceiver(context);
+                case DEFAULT_MODE:
+                    sender = new InnerSender(context);
+                    receiver = new InnerReceiver(context);
+                    break;
+                case "redis":
+                    sender = new RedisSender(context);
+                    receiver = new RedisReceiver(context);
+                    break;
+                case "rocketmq":
+                    sender = new RocketMQSender(context);
+                    receiver = new RocketMQReceiver(context);
+                    break;
+                default:
+                    sender = new InnerSender(context);
+                    receiver = new InnerReceiver(context);
             }
 
             context.setSender(sender);
             context.setReceiver(receiver);
-            SpearServer spearServer = new SpearServer(context);
+            spearServer = new SpearServer(context);
 
             sender.run();
             spearServer.run();
@@ -100,8 +99,7 @@ public class SpearMain {
                 MonitorServer monitorServer = new MonitorServer(context);
                 monitorServer.run();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             logger.error("spear服务启动出错", e);
             System.exit(-1);
         }
@@ -121,8 +119,7 @@ public class SpearMain {
                 //启动节点信息统计上报服务
                 UserStat userStat = new UserStat(context);
                 userStat.run();
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 logger.error("在zk上注册服务、开启上报服务出错", e);
                 System.exit(-1);
             }
@@ -133,8 +130,7 @@ public class SpearMain {
             while (true) {
                 try {
                     SpearMain.class.wait();
-                }
-                catch (Throwable e) {
+                } catch (Throwable e) {
                 }
             }
         }

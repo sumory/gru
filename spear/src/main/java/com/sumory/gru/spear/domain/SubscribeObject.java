@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSON;
 
 /**
  * 用户订阅群组的object
- * 
+ *
  * @author sumory.wu
  * @date 2015年10月18日 下午3:36:00
  */
