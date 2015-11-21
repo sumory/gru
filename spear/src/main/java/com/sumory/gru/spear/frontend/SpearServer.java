@@ -1,6 +1,5 @@
 package com.sumory.gru.spear.frontend;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.corundumstudio.socketio.*;
 import com.corundumstudio.socketio.listener.ConnectListener;
@@ -42,7 +41,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public class SpearServer {
     private final static Logger logger = LoggerFactory.getLogger(SpearServer.class);
 
-    private SpearContext context;
+    private final SpearContext context;
     private SocketIOServer server;
 
     private ConcurrentHashMap<String, Group> groupMap;//groupId - group
@@ -94,6 +93,13 @@ public class SpearServer {
         return true;
     }
 
+    /**
+     * 判断是否已通过授权
+     *
+     * @param ioClient
+     * @return
+     * @author sumory.wu @date 2015年11月21日 下午2:58:29
+     */
     private boolean checkAuth(SocketIOClient ioClient) {
         logger.debug("验证是否授权");
         Boolean authed = ioClient.get("auth");
@@ -133,13 +139,15 @@ public class SpearServer {
                 AuthObject authObject = JSONObject.parseObject(authStr, AuthObject.class);
 
                 if (!auth(authObject)) {//鉴权
+                    ioClient.set("auth", false);
+                    CommonResult result = new CommonResult(false, ResultCode.PARAMS_ERROR, "无法通过权限验证");
+                    ackRequest.sendAckData(result);
                     ioClient.disconnect();
                     return;
                 }
 
                 //client id为节点内使用，只是用于区分不同client，所以不必依赖IdService
-                Client newClient = new Client(IdUtil.generateClientId(), ioClient);
-
+                Client newClient = new Client(IdUtil.generateClientId(), ioClient, context.getAck());
                 synchronized (userMap) {
                     String key = authObject.getId() + "";//用户的id作为key
                     boolean isUserExist = userMap.containsKey(key);
@@ -163,8 +171,8 @@ public class SpearServer {
                 logger.debug("用户总数：{}", userMap.size());
 
                 ioClient.set("auth", true);//验证通过
-                CommonResult cr = new CommonResult(true);
-                ioClient.sendEvent("auth_result", cr);
+                CommonResult result = new CommonResult(true);
+                ackRequest.sendAckData(result);
             }
         });
 
@@ -187,14 +195,14 @@ public class SpearServer {
                 long userId = sObject.getUserId();//订阅信息中传过来的userId
 
                 if (u == null || userId == 0 || u.getId() != userId) {
-                    CommonResult cr = new CommonResult(false, ResultCode.DEFAULT_ERROR, "无法找到用户");
-                    ioClient.sendEvent("subscribe_result", cr);
+                    CommonResult result = new CommonResult(false, ResultCode.DEFAULT_ERROR, "无法找到用户");
+                    ackRequest.sendAckData(result);
                     return;
                 }
 
                 if (sObject.getUserId() == 0 || CollectionUtils.isEmpty(subscribeGroups)) {
-                    CommonResult cr = new CommonResult(false, ResultCode.PARAMS_ERROR, "参数错误: 订阅的用户id为空或者订阅的群组为空");
-                    ioClient.sendEvent("subscribe_result", cr);
+                    CommonResult result = new CommonResult(false, ResultCode.PARAMS_ERROR, "参数错误: 订阅的用户id为空或者订阅的群组为空");
+                    ackRequest.sendAckData(result);
                     return;
                 }
 
@@ -249,8 +257,8 @@ public class SpearServer {
 
                 Map<String, Object> extraResult = new HashMap<String, Object>();
                 extraResult.put("subscribeInfo", subscribeStr);
-                CommonResult cr = new CommonResult(true, "订阅群组消息成功", extraResult);
-                ioClient.sendEvent("subscribe_result", cr);
+                CommonResult result = new CommonResult(true, "订阅群组消息成功", extraResult);
+                ackRequest.sendAckData(result);
             }
         });
 
@@ -258,17 +266,16 @@ public class SpearServer {
         server.addEventListener("msg", String.class, new SenderDataListener<String>(sender) {
             //需判断是否已经是授权过的连接发送的信息，是否需要另加token？
             @Override
-            public void onData(SocketIOClient ioClient, String data, AckRequest ackRequest) {
-                logger.debug("收到信息, ioClient sessionId: {}, msg: {}", ioClient.getSessionId(), data);
+            public void onData(final SocketIOClient ioClient, String data, AckRequest ackRequest) {
+                logger.debug("收到信息, ioClient sessionId:{}, msg:{}", ioClient.getSessionId(), data);
                 boolean checkResult = checkAuth(ioClient);
                 if (!checkResult) {
                     logger.debug("无授权访问，断开连接: {}", ioClient.getRemoteAddress());
                     ioClient.disconnect();
                 }
 
-                Map<String, Object> result = new HashMap<String, Object>();
                 try {
-                    MsgObject msg = JSONObject.parseObject(data, MsgObject.class);
+                    final MsgObject msg = JSONObject.parseObject(data, MsgObject.class);
                     User user = ioClient.get("user");//client对应的user
                     msg.setFromId(user.getId());//设置发送者id
 
@@ -276,30 +283,21 @@ public class SpearServer {
                     if (msgType == MsgObject.BRAODCAST.getValue()) {//群发
                         logger.debug("来自用户{}的群播消息", user.getId());
                     } else if (msgType == MsgObject.UNICAST.getValue()) {//单发
-                        logger.debug("来自用户{}的单播到用户{}的消息", user.getId(), msg.getTarget().get("id"));
+                        logger.debug("来自用户{}-->用户{}的消息", user.getId(), msg.getTarget().get("id"));
                     } else {
-                        result.put("success", false);
-                        result.put("errorCode", ResultCode.PARAMS_ERROR);
-                        result.put("msg", "消息类型不正确，请注明类型");
-                        ioClient.sendEvent("msg_result", result);
+                        CommonResult result = new CommonResult(false, ResultCode.PARAMS_ERROR, "消息类型不正确，请注明类型");
+                        ackRequest.sendAckData(result);//ack消息，告知客户端发生错误
                         return;
                     }
 
-                    logger.debug("发到队列消息---->：来自userId: {}, userName: {}", user.getId(),
-                            user.getName());
-
-                    //sender.send("class", 0, data);
+                    logger.debug("消息发到队列, 来自userId:{}, userName:{}", user.getId(), user.getName());
                     sender.send(gruTopic, msg);
 
-                    result.put("success", true);
-                    result.put("errorCode", ResultCode.SUCCESS);
-                    result.put("msg", "服务器已收到您发送的消息");
-                    ioClient.sendEvent("msg_result", result);
+                    CommonResult result = new CommonResult(true, ResultCode.SUCCESS, "服务器已收到您发送的消息");
+                    ackRequest.sendAckData(result);//ack消息，告知客户端已收到
                 } catch (Exception e) {
-                    result.put("success", false);
-                    result.put("errorCode", ResultCode.SYSTEM_ERROR);
-                    result.put("msg", "服务器处理消息发生异常，请检查");
-                    ioClient.sendEvent("msg_result", result);
+                    CommonResult result = new CommonResult(false, ResultCode.SYSTEM_ERROR, "服务器处理消息发生异常，请检查");
+                    ackRequest.sendAckData(result);//ack消息，告知客户端异常
                     logger.error("处理收到的消息出错", e);
                 }
             }
@@ -318,38 +316,28 @@ public class SpearServer {
                     ioClient.disconnect();
                 }
 
-                Map<String, Object> result = new HashMap<String, Object>();
-                String onlineResultEvent = "online_result";
                 try {
                     Long groupId = Long.parseLong(group);//用户传过来的想要查询的group
-
                     List<StatObject> stats = statService.getGroupStatObjectList(groupId);
                     Set<Integer> userIds = new HashSet<Integer>();
-                    List<User> tachers = new ArrayList<User>();
                     for (StatObject s : stats) {
                         if (s != null) {
-                            List<User> ts = JSON.parseArray(s.getExtra(), User.class);
-                            tachers.addAll(ts);
                             s.setBitSet((BitSet) BitSetUtil.bytes2Object(s.getBitSetBytes()));
-
                             List<Integer> uIds = BitSetUtil.recoverFrom(s);
                             if (uIds != null && uIds.size() > 0)
                                 userIds.addAll(uIds);
                         }
                     }
+                    logger.info("群组{}在线用户{}", groupId, userIds);
 
-                    logger.info("在线用户{}", userIds);
-                    result.put("success", true);
-                    result.put("errorCode", ResultCode.SUCCESS);
-                    result.put("msg", "");
-                    result.put("data", userIds);
-                    result.put("teachers", tachers);
-                    ioClient.sendEvent(onlineResultEvent, result);
+                    Map<String, Object> data = new HashMap<String, Object>();
+                    data.put("userIds", userIds);
+                    CommonResult result = new CommonResult(true, ResultCode.SUCCESS, "", data);
+                    ackRequest.sendAckData(result);
+
                 } catch (Exception e) {
-                    result.put("success", false);
-                    result.put("errorCode", ResultCode.SYSTEM_ERROR);
-                    result.put("msg", "服务器处理请求发生异常，请检查");
-                    ioClient.sendEvent(onlineResultEvent, result);
+                    CommonResult result = new CommonResult(false, ResultCode.SYSTEM_ERROR, "服务器处理请求发生异常");
+                    ackRequest.sendAckData(result);
                     logger.error("处理在线人数查询请求出错", e);
                 }
             }
@@ -370,12 +358,6 @@ public class SpearServer {
             public void onDisconnect(SocketIOClient ioClient) {
                 ioClient.set("auth", false);
                 User u = ioClient.get("user");
-                try {
-                    ioClient.disconnect();
-                } catch (Exception e) {
-                    logger.error("手动调用client.disconnect出错", e);
-                }
-
                 if (u != null) {
                     synchronized (u) {
                         if (u != null) {
@@ -389,10 +371,9 @@ public class SpearServer {
                                 if (!CollectionUtils.isEmpty(joinedGroups)) {
                                     logger.debug("要完全退出的用户{}加入的群组不为空，挨个从群组里删除该用户", u.getId());
                                     for (Group g : joinedGroups) {
-                                        //直接kickGroup的操作直接会从groupMap删除某个group，所以这里得到的可能为空
+                                        //kickGroup的操作会从groupMap删除某个group(锁不在user上)，所以这里得到的可能为空，须判断
                                         if (g != null) {
-                                            logger.debug("从群组挨个删除用户开始, groupId:{} userId:{}",
-                                                    g.getId(), u.getId());
+                                            logger.debug("从群组挨个删除用户开始, groupId:{} userId:{}", g.getId(), u.getId());
                                             g.removeUserFromGroup(u);
                                         } else {
                                             logger.debug("从群组挨个删除用户{}, 群组为null", u.getId());
@@ -403,6 +384,7 @@ public class SpearServer {
                         }
                     }
                 }
+                ioClient.disconnect();
                 ioClient = null;
             }
         });

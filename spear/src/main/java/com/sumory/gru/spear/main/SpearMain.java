@@ -2,6 +2,8 @@ package com.sumory.gru.spear.main;
 
 import java.util.Map;
 
+import com.sumory.gru.spear.extention.IAck;
+import com.sumory.gru.spear.extention.LogAck;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -45,22 +47,46 @@ public class SpearMain {
         try {
             if (DEFAULT_MODE.equals(config.get("mode"))) {//最小化部署single模式时使用本地实现的两个service
                 idService = new InnerIdService();
-                statService = new InnerStatService();//最小化模式不提供stat服务，所以这个接口没有具体实现，后面也不会被调用到
+                //最小化模式不提供stat服务，所以这个接口没有具体实现，后面也不会被调用到
+                statService = new InnerStatService();
             } else {//开启了集群模式服务
                 ApplicationContext appContext = new ClassPathXmlApplicationContext(new String[]{
-                        "applicationContext.xml", "applicationContext-consumer-idgen.xml",
+                        "applicationContext.xml",
+                        "applicationContext-consumer-idgen.xml",
                         "applicationContext-consumer-stat.xml"});
                 idService = (IdService) appContext.getBean("idService");
                 statService = (StatService) appContext.getBean("statService");
-
             }
 
-            logger.info("idgen service version:{} ", idService.getServiceVersion());
-            logger.info("stat service version:{}", statService.getServiceVersion());
+            logger.info("idgen service version:{}, stat service version:{}", idService.getServiceVersion(),
+                    statService.getServiceVersion());
             context.setIdService(idService);
             context.setStatService(statService);
         } catch (Exception e) {
             logger.error("spear服务启动出错", e);
+            System.exit(-1);
+        }
+
+        //需要ack的情况，创建ack
+        try {
+            IAck ack = null;
+            String ackType = config.get("ack") != null ? config.get("ack") : "";
+            switch (ackType) {
+                case "":
+                    break;
+                case "log":
+                    ack = new LogAck();
+                    break;
+                case "rabbitmq":
+                    //ack = new RabbitMQAck();
+                    break;
+                default:
+                    ack = null;
+            }
+            logger.info("ack模式为:{}", ackType);
+            context.setAck(ack);
+        } catch (Exception e) {
+            logger.error("设置ack出错", e);
             System.exit(-1);
         }
 
@@ -103,6 +129,7 @@ public class SpearMain {
             logger.error("spear服务启动出错", e);
             System.exit(-1);
         }
+
 
         //注册本节点到zookeeper，启动节点信息上报服务
         if (!DEFAULT_MODE.equals(config.get("mode"))) {

@@ -10,25 +10,27 @@ import com.sumory.gru.idgen.service.IdService;
 import com.sumory.gru.spear.domain.Group;
 import com.sumory.gru.spear.domain.MsgObject;
 import com.sumory.gru.spear.domain.User;
+import com.sumory.gru.spear.extention.IAck;
 import com.sumory.gru.spear.transport.IReceiver;
 import com.sumory.gru.spear.transport.ISender;
 import com.sumory.gru.stat.service.StatService;
 
 /**
  * spear上下文
- * 
+ *
  * @author sumory.wu
  * @date 2015年3月23日 下午6:42:49
  */
 public class SpearContext {
 
     private static ConcurrentHashMap<String, Group> groupMap;//以群组id作为key
-    private static ConcurrentHashMap<String, User> userMap;//以“用户类型_用户id”作为key
+    private static ConcurrentHashMap<String, User> userMap;//以用户id作为key
     private static Map<String, String> config;//全局配置
     private IdService idService;
     private StatService statService;
     private ISender sender;
     private IReceiver receiver;
+    private IAck ack;
     private BlockingQueue<MsgObject> msgQueue;//存放消息的队列，用于单节点时进程内部传输消息使用
 
     private SpearContext() {
@@ -94,4 +96,11 @@ public class SpearContext {
         return msgQueue;
     }
 
+    public IAck getAck() {
+        return ack;
+    }
+
+    public void setAck(IAck ack) {
+        this.ack = ack;
+    }
 }

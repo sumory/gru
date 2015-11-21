@@ -143,80 +143,70 @@
             var userType = $("#userType").dropdown("get value");
             updateStatus("连接成功" + url);
             output('<span class="connect-msg">Client has connected to the server!</span>');
-            socket.emit('auth', JSON.stringify({
+
+            var authObject = JSON.stringify({
                 id: $("#id").val(),
                 name: userName,
                 token1: token1,
                 token2: token2
-            }));
-        });
+            });
 
-        socket.on('auth_result', function (data) {
-            output('授权结果：' + JSON.stringify(data));
-            updateStatus("连接成功");
+            socket.emit('auth', authObject, function(data){
+                output('授权结果：' + JSON.stringify(data));
+                updateStatus("连接成功");
 
-            var groups = $("#groupId").val();
-            if (!groups) {
-                updateStatus("未订阅群组");
-                return;
-            }
-
-
-            var groupIds = groups.split(",");
-
-            var subscribeGroups = [];
-
-            $("#groupIdToSend .menu").html("");
-            for (var i in groupIds) {
-                if (isNum(groupIds[i])) {
-                    var gid = parseInt(groupIds[i], 10);
-                    subscribeGroups.push({
-                        id: gid,
-                        name: "群组" + gid
-                    });
-
-                    $("#groupIdToSend .menu").append('<div class="item" data-value="' +gid+ '">' +("群组" + gid)+ '</div>');
+                var groups = $("#groupId").val();
+                if (!groups) {
+                    updateStatus("未订阅群组");
+                    return;
                 }
-            }
 
+                var groupIds = groups.split(",");
+                var subscribeGroups = [];
 
-            if (subscribeGroups.length > 0) {
-                socket.emit('subscribe', JSON.stringify({
-                    userId: parseInt($("#id").val(), 10),
-                    // subscribeGroups:subscribeGroups
-                    subscribeGroups: subscribeGroups
-                }));
-            }
+                $("#groupIdToSend .menu").html("");
+                for (var i in groupIds) {
+                    if (isNum(groupIds[i])) {
+                        var gid = parseInt(groupIds[i], 10);
+                        subscribeGroups.push({
+                            id: gid,
+                            name: "群组" + gid
+                        });
 
+                        $("#groupIdToSend .menu").append('<div class="item" data-value="' + gid + '">' + ("群组" + gid) + '</div>');
+                    }
+                }
 
+                if (subscribeGroups.length > 0) {
+                    socket.emit('subscribe', JSON.stringify({
+                        userId: parseInt($("#id").val(), 10),
+                        subscribeGroups: subscribeGroups
+                    }), function(data){
+                        output("订阅成功：" + JSON.stringify(data));
+                    });
+                }
+            });
         });
 
-        //订阅群组的回调
-        socket.on('subscribe_result', function (data) {
-            output("订阅成功：" + JSON.stringify(data));
-        });
+        socket.on('msg', function (msg, ackFunc) {
+            console.log("收到新消息",msg);
 
-        //获取到的在线人
-        socket.on('online_result', function (data) {
-            output("在线人：" + JSON.stringify(data));
-        });
-
-
-        socket.on('msg', function (msg) {
-            console.log(msg);
             var data = {};
             try {
-
                 data = JSON.parse(msg.content);
             } catch (e) {
                 data = msg;
             }
 
-            if (data.userName) {
-                if (data.userName == userName)
+            ackFunc && ackFunc(JSON.stringify(data));//发送回执
+
+            if (data.fromId) {
+                if (data.fromId == userId)
                     data.userName = "我";
-                output('<span class="username-msg">' + data.userName
-                        + ':</span> ' + data.message);
+                else
+                    data.userName = data.fromId;
+                output('收到消息[<span class="username-msg">' + data.userName
+                + '</span>]: ' + JSON.stringify(data));
             } else
                 output('收到消息：' + JSON.stringify(data));
         });
@@ -242,12 +232,14 @@
         var msg = {
             type: 1, //1 广播，0 单播给指定target
             target: {
-                id:targetGroupId
+                id: targetGroupId
             },
             content: message
         };
 
-        socket.emit('msg', JSON.stringify(msg));
+        socket.emit('msg', JSON.stringify(msg), function (ack) {
+            console.log("sendBroadcastMessage ack:", ack)
+        });
     }
 
     function sendUnicastMessage() {
@@ -263,13 +255,16 @@
             content: message
         };
 
-
-        socket.emit('msg', JSON.stringify(msg));
+        socket.emit('msg', JSON.stringify(msg), function (ack) {
+            console.log("sendUnicastMessage ack:", ack)
+        });
     }
 
     //发送“在线列表”查询请求
     function sendOnlineMessage() {
-        socket.emit('online', $("#groupId").val());
+        socket.emit('online', $("#groupId").val(), function (data) {
+            output("在线人：" + JSON.stringify(data));
+        });
     }
 
     $("#clearBtn").click(function () {
