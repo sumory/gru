@@ -11,7 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.sumory.gru.idgen.service.IdService;
 import com.sumory.gru.spear.SpearContext;
-import com.sumory.gru.spear.frontend.SpearServer;
+import com.sumory.gru.spear.server.SpearServer;
 import com.sumory.gru.spear.monitor.MonitorServer;
 import com.sumory.gru.spear.service.InnerIdService;
 import com.sumory.gru.spear.service.InnerStatService;
