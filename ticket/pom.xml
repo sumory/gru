@@ -148,7 +148,7 @@
 								<resource>
 									<directory>src/main/resources/profiles/${profiles.active}/</directory>
 									<includes>
-										<include>*.properties</include>
+										<include>*.*</include>
 									</includes>
 								</resource>
 							</resources>
