@@ -78,6 +78,7 @@ public class TicketServer {
         // 绑定端口，同步等待成功
         ChannelFuture f = b.bind(Config.get("ticket.hostname"),
                 Integer.parseInt(Config.get("ticket.port")));
+        logger.info("启动ticket server @{}", Config.get("ticket.port"));
         f.addListener(new ChannelFutureListener() {
             public void operationComplete(ChannelFuture future) throws Exception {
                 if (future.isSuccess()) {

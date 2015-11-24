@@ -9,9 +9,12 @@ var router = express.Router();
 router.get("/genToken", function (req, res, next) {
     var userId = req.query.userId;
     var userName = req.query.userName;
+    var appType = req.query.appType;
 
-    var token1 = commonUtils.md5(userId+"_"+userName, "token_gen_for_ticket@sumory.com");
-    var token2 = commonUtils.md5(userId+"_"+userName+"_"+token1, "token_gen_for_spear@sumory.com");
+    console.log("params:", userId, userName, appType);
+
+    var token1 = commonUtils.md5(userId+"_"+userName+"_"+appType, "token_gen_for_ticket@sumory.com");
+    var token2 = commonUtils.md5(userId+"_"+userName+"_"+appType+"_"+token1, "token_gen_for_spear@sumory.com");
 
     res.json({
         success:true,
